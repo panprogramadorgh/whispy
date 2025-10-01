@@ -1,3 +1,4 @@
+from os.path import dirname, join
 import ctypes
 
 # User defined types
@@ -37,9 +38,8 @@ def _format_tc_error(tc: _TranscriptContext, context: str | None = None):
   
   return message
 
-# FIXME: We do not want relative paths here 
 _MODELS = {
-  "base": b"./src/backend/whisper.cpp/models/ggml-base.bin"
+  "base": bytes(join(dirname(__file__), "backend", "whisper.cpp", "models", "ggml-base.bin"), encoding="utf-8")
 }
 
 def _fetch_model_path(name: str):
@@ -91,7 +91,8 @@ class WhisperModel:
     if speach_result != 0:
       raise WhisperTextGenError(_format_tc_error(self._tc, "Speach to text error"))
 
-    return str(memoryview(text), encoding="utf-8")
+    encoded_text =  str(memoryview(text), encoding="utf-8")
+    return encoded_text[:encoded_text.find('\0')]
 
 
 def main():

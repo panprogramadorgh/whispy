@@ -1,3 +1,4 @@
+from os import getenv
 from os.path import dirname, join
 import ctypes
 
@@ -12,7 +13,8 @@ class _TranscriptContext(ctypes.Structure):
 
 # Function prototyping
 
-_libwhisperpy = ctypes.CDLL("./build/libwhisperpy.so")
+_libwhisperpy_so_path = f"/app/{getenv("BUILD_DIRECTORY", "cmake-build")}/libwhisperpy.so"
+_libwhisperpy = ctypes.CDLL(_libwhisperpy_so_path)
 
 _libwhisperpy.transcript_context_make.argtypes = [ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
 _libwhisperpy.transcript_context_make.restype = ctypes.c_uint8

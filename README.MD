@@ -15,16 +15,10 @@ git submodule init
 git submodule update
 ```
 
-Build a docker image:
+Select the kind of build that you want to compile. Regular builds are considered for testing, so for production you will need the deployment one.
 
 ```bash
-docker build -t whisperpy
+docker compose up whisperpy_deploy
 ```
 
-And run the container:
-
-```bash
-docker container run -n your_container_name whisperpy
-```
-
-Doing this whole process, it will compile library backend and run a high level interface [test](./tests/basic-test.py).
+By doing this whole process, you should be able to compile whisperpy's backend binaries.

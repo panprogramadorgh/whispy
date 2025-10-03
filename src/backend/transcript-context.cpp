@@ -11,6 +11,129 @@
 #include "whisperpy.h"
 #include "utils.tpp"
 
+/**
+  struct whisper_context_params {
+      bool  use_gpu;
+      bool  flash_attn;
+      int   gpu_device;  // cuda device
+
+      // [experimental] token-level timestamps with dtw
+      bool dtw_token_timestamps;
+      enum whisper_alignment_heads_preset dtw_aheads_preset;
+
+      int dtw_n_top;
+      struct whisper_aheads dtw_aheads;
+
+      size_t dtw_mem_size; // todo: remove
+  };
+
+  struct whisper_full_params {
+      enum whisper_sampling_strategy strategy;
+
+      int n_threads;
+      int n_max_text_ctx;     // max tokens to use from past text as prompt for the decoder
+      int offset_ms;          // start offset in ms
+      int duration_ms;        // audio duration to process in ms
+
+      bool translate;
+      bool no_context;        // do not use past transcription (if any) as initial prompt for the decoder
+      bool no_timestamps;     // do not generate timestamps
+      bool single_segment;    // force single segment output (useful for streaming)
+      bool print_special;     // print special tokens (e.g. <SOT>, <EOT>, <BEG>, etc.)
+      bool print_progress;    // print progress information
+      bool print_realtime;    // print results from within whisper.cpp (avoid it, use callback instead)
+      bool print_timestamps;  // print timestamps for each text segment when printing realtime
+
+      // [EXPERIMENTAL] token-level timestamps
+      bool  token_timestamps; // enable token-level timestamps
+      float thold_pt;         // timestamp token probability threshold (~0.01)
+      float thold_ptsum;      // timestamp token sum probability threshold (~0.01)
+      int   max_len;          // max segment length in characters
+      bool  split_on_word;    // split on word rather than on token (when used with max_len)
+      int   max_tokens;       // max tokens per segment (0 = no limit)
+
+      // [EXPERIMENTAL] speed-up techniques
+      // note: these can significantly reduce the quality of the output
+      bool debug_mode;        // enable debug_mode provides extra info (eg. Dump log_mel)
+      int  audio_ctx;         // overwrite the audio context size (0 = use default)
+
+      // [EXPERIMENTAL] [TDRZ] tinydiarize
+      bool tdrz_enable;       // enable tinydiarize speaker turn detection
+
+      // A regular expression that matches tokens to suppress
+      const char * suppress_regex;
+
+      // tokens to provide to the whisper decoder as initial prompt
+      // these are prepended to any existing text context from a previous call
+      // use whisper_tokenize() to convert text to tokens
+      // maximum of whisper_n_text_ctx()/2 tokens are used (typically 224)
+      const char * initial_prompt;
+      const whisper_token * prompt_tokens;
+      int prompt_n_tokens;
+
+      // for auto-detection, set to nullptr, "" or "auto"
+      const char * language;
+      bool detect_language;
+
+      // common decoding parameters:
+      bool suppress_blank; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L89
+      bool suppress_nst;   // non-speech tokens, ref: https://github.com/openai/whisper/blob/7858aa9c08d98f75575035ecd6481f462d66ca27/whisper/tokenizer.py#L224-L253
+
+      float temperature;      // initial decoding temperature, ref: https://ai.stackexchange.com/a/32478
+      float max_initial_ts;   // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L97
+      float length_penalty;   // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L267
+
+      // fallback parameters
+      // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L274-L278
+      float temperature_inc;
+      float entropy_thold;    // similar to OpenAI's "compression_ratio_threshold"
+      float logprob_thold;
+      float no_speech_thold;
+
+      struct {
+          int best_of;    // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
+      } greedy;
+
+      struct {
+          int beam_size;  // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L265
+
+          float patience; // TODO: not implemented, ref: https://arxiv.org/pdf/2204.05424.pdf
+      } beam_search;
+
+      // called for every newly generated text segment
+      whisper_new_segment_callback new_segment_callback;
+      void * new_segment_callback_user_data;
+
+      // called on each progress update
+      whisper_progress_callback progress_callback;
+      void * progress_callback_user_data;
+
+      // called each time before the encoder starts
+      whisper_encoder_begin_callback encoder_begin_callback;
+      void * encoder_begin_callback_user_data;
+
+      // called each time before ggml computation starts
+      ggml_abort_callback abort_callback;
+      void * abort_callback_user_data;
+
+      // called by each decoder to filter obtained logits
+      whisper_logits_filter_callback logits_filter_callback;
+      void * logits_filter_callback_user_data;
+
+      const whisper_grammar_element ** grammar_rules;
+      size_t                           n_grammar_rules;
+      size_t                           i_start_rule;
+      float                            grammar_penalty;
+
+      // Voice Activity Detection (VAD) params
+      bool         vad;                         // Enable VAD
+      const char * vad_model_path;              // Path to VAD model
+
+      whisper_vad_params vad_params;
+  };
+
+*/
+
 const std::uint8_t tc_error_message_length = 128;
 
 extern "C"

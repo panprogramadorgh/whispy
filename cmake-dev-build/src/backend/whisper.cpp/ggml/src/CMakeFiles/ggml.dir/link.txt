@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -g -Wl,--dependency-file=CMakeFiles/ggml.dir/link.d -shared -Wl,-soname,libggml.so -o libggml.so "CMakeFiles/ggml.dir/ggml-backend-reg.cpp.o"  -Wl,-rpath,/app/cmake-dev-build/src/backend/whisper.cpp/ggml/src: -ldl libggml-cpu.so libggml-base.so

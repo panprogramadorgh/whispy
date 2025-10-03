@@ -1,6 +1,25 @@
-from os import getenv
+from sys import exit, stderr
+from os import getenv, path
 from os.path import dirname, join
 import ctypes
+
+IS_DEVELOPMENT = False
+WHISPERPY_LIBRARY_MODE = getenv("WHISPERPY_LIBRARY_MODE")
+if WHISPERPY_LIBRARY_MODE and isinstance(WHISPERPY_LIBRARY_MODE, str):
+  IS_DEVELOPMENT = WHISPERPY_LIBRARY_MODE.strip().lower().split()[0].startswith("dev")
+
+
+def get_whisperpy_backend_library_path():
+  project_root = path.dirname(path.dirname(__file__))
+  backend_dir =  {
+    True: path.join(project_root, "cmake-dev-build"), # Is development
+    False: path.join(project_root, "cmake-build") # Is not development
+  }[IS_DEVELOPMENT]
+  backend_lib_path = path.join(backend_dir, "libwhisperpy.so")
+  if not path.exists(backend_lib_path):
+    raise RuntimeError(f"Unable to find whisperpy backend library: {backend_lib_path}")
+  return backend_lib_path
+
 
 # User defined types
 
@@ -13,17 +32,22 @@ class _TranscriptContext(ctypes.Structure):
 
 # Function prototyping
 
-_libwhisperpy_so_path = f"/app/{getenv("BUILD_DIRECTORY", "cmake-build")}/libwhisperpy.so"
-_libwhisperpy = ctypes.CDLL(_libwhisperpy_so_path)
 
-_libwhisperpy.transcript_context_make.argtypes = [ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
-_libwhisperpy.transcript_context_make.restype = ctypes.c_uint8
+_libwhisperpy: ctypes.CDLL | None = None
+libwhisperpy_ld_error: str | None = None
+try:
+  _libwhisperpy = ctypes.CDLL(get_whisperpy_backend_library_path())
+except Exception as error:
+  libwhisperpy_ld_error = f"Unable to load whisperpy backend library: {error}"
+else:
+  _libwhisperpy.transcript_context_make.argtypes = [ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
+  _libwhisperpy.transcript_context_make.restype = ctypes.c_uint8
 
-_libwhisperpy.transcript_context_free.argtypes = [ctypes.POINTER(_TranscriptContext)]
-_libwhisperpy.transcript_context_free.restype = ctypes.c_uint8
+  _libwhisperpy.transcript_context_free.argtypes = [ctypes.POINTER(_TranscriptContext)]
+  _libwhisperpy.transcript_context_free.restype = ctypes.c_uint8
 
-_libwhisperpy.speach_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
-_libwhisperpy.speach_to_text.restype = ctypes.c_uint8
+  _libwhisperpy.speach_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
+  _libwhisperpy.speach_to_text.restype = ctypes.c_uint8
 
 # Internal utils
 
@@ -57,7 +81,6 @@ class WhisperTextGenError(RuntimeError):
   def __init__(self, detail: str | None):
     super().__init__(detail)
 
-
 # TODO: Select model name istead of the path
 class WhisperModel:
   """
@@ -72,6 +95,9 @@ class WhisperModel:
     Raises:
         RuntimeError: If the underlying C api detects an error.
     """
+    if libwhisperpy_ld_error is not None:
+      raise WhisperInitError(f"Model initialization error: {libwhisperpy_ld_error}")
+
     model_path = _fetch_model_path(model_name)
     if model_path is None:
       raise WhisperInitError("No such model name.")

@@ -1,11 +1,11 @@
-FROM debian:trixie-backports as builder
+FROM gcc:15.2.0 as builder
 
-ENV WHISPERPY_CMAKE_BUILD_TYPE=Debug
-ENV WHISPERPY_CMAKE_BUILD_DIR=/app/cmake-dev-build
+ENV WHISPERPY_CMAKE_BUILD_TYPE=Release
+ENV WHISPERPY_CMAKE_BUILD_DIR=cmake-build
+
+RUN apt update && apt install -y cmake make
 
 WORKDIR /app
 COPY . .
 
-RUN apt update && apt install -y g++ make cmake
-
-CMD ["sh", "-c", "echo WHISPERPY_CMAKE_BUILD_DIR=$WHISPERPY_CMAKE_BUILD_DIR WHISPERPY_CMAKE_BUILD_TYPE=$WHISPERPY_CMAKE_BUILD_TYPE && cmake . -B $WHISPERPY_CMAKE_BUILD_DIR -DCMAKE_BUILD_TYPE=$WHISPERPY_CMAKE_BUILD_TYPE && cmake --build $WHISPERPY_CMAKE_BUILD_DIR && ls -lah $WHISPERPY_CMAKE_BUILD_DIR"]
+CMD ["sh", "-c", "./configure.sh && ./make.sh"]

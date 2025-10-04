@@ -56,10 +56,9 @@ class WhisperpyLoader:
       raise RuntimeError(self._loading_error)
     return self._lib
 
+  @property 
+  def loading_error(self):
+    return self._loading_error if self._loading_error is not None else ""
+
   def __bool__(self):
-    self._loading_error is None
-  
-  def __repr__(self):
-    verified_message = self._loading_error if self._loading_error is not None else "no errors"
-    return f"< WhisperLoader _loading_error='{verified_message}' >"
-  
+    return self._loading_error is None

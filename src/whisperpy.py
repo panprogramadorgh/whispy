@@ -17,7 +17,7 @@ class WhisperModel:
     """
     loader = WhisperpyLoader()
     if not loader:
-      raise WhisperInitError(repr(loader))  
+      raise WhisperInitError(loader.loading_error)  
     self._client  = loader.get()
 
     model_path = fetch_model_path(model_name)

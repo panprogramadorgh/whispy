@@ -1,5 +1,5 @@
 services:
-  whisperpy_dev_build: # Testing build container
+  whisperpy_dev_builder: # Testing build container
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -7,18 +7,19 @@ services:
       - .:/app
     environment:
       - WHISPERPY_CMAKE_BUILD_TYPE=Debug
-      - WHISPERPY_CMAKE_BUILD_DIR=/app/cmake-dev-build
+      - WHISPERPY_CMAKE_BUILD_DIR=cmake-dev-build
+      - WHISPERPY_CMAKE_CXX_COMPILER=/usr/local/bin/g++
 
-  whisper_test: # Testing container
-    image: python:latest
-    command: sh -c "./tests/runall.sh"
-    working_dir: /app
+  whisperpy_tester: # Testing container
+    build:
+      context: .
+      dockerfile: ./Dockerfile.tester
     volumes:
       - .:/app
     environment:
       - WHISPERPY_LIBRARY_MODE=Development
   
-  whisperpy_deploy_build: # Release build container
+  whisperpy_deploy_builder: # Release build container
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -26,4 +27,5 @@ services:
       - .:/app
     environment:
       - WHISPERPY_CMAKE_BUILD_TYPE=Release
-      - WHISPERPY_CMAKE_BUILD_DIR=/app/cmake-build
+      - WHISPERPY_CMAKE_BUILD_DIR=cmake-build
+      - WHISPERPY_CMAKE_CXX_COMPILER=/usr/local/bin/g++

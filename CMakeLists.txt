@@ -18,8 +18,11 @@ set_target_properties(${TARGET} PROPERTIES BUILD_RPATH "$ORIGIN/src/backend/whis
 # Config whisper.cpp
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/backend/whisper.cpp")
 
-set_target_properties(${TARGET} PROPERTIES BUILD_RPATH "$ORIGIN/src/backend/whisper.cpp/src")
-set_target_properties(whisper PROPERTIES BUILD_RPATH "$ORIGIN/src/backend/whisper.cpp/ggml/src")
+set_target_properties(${TARGET} PROPERTIES BUILD_RPATH "$ORIGIN")
+set_target_properties(whisper PROPERTIES BUILD_RPATH "$ORIGIN")
+set_target_properties(ggml PROPERTIES BUILD_RPATH "$ORIGIN")
+set_target_properties(ggml-base PROPERTIES BUILD_RPATH "$ORIGIN")
+set_target_properties(ggml-cpu PROPERTIES BUILD_RPATH "$ORIGIN")
 
 target_link_libraries(${TARGET} PUBLIC whisper)
 

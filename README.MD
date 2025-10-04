@@ -18,7 +18,7 @@ git submodule update
 Select the kind of build that you want to compile. Regular builds are considered for testing, so for production you will need the deployment one.
 
 ```bash
-docker compose up whisperpy_deploy
+docker compose up whisperpy_deploy_builder
 ```
 
 By doing this whole process, you should be able to compile whisperpy's backend binaries.

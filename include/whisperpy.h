@@ -40,7 +40,7 @@ extern "C"
 
   struct transcript_context
   {
-    tcontext_state last_error = TC_OK;
+    tcontext_state last_error_code = TC_OK;
     char *last_error_message = nullptr;
     whisper_context *model_context = nullptr;
   };

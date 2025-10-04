@@ -142,7 +142,7 @@ extern "C"
   {
     std::vector<std::uint8_t> model_file;
 
-    tc->last_error = TC_OK;
+    tc->last_error_code = TC_OK;
 
     try
     {
@@ -150,7 +150,7 @@ extern "C"
     }
     catch (const std::exception &e)
     {
-      tc->last_error = TC_MEMALLOC_ERROR;
+      tc->last_error_code = TC_MEMALLOC_ERROR;
       return TC_MEMALLOC_ERROR;
     }
 
@@ -162,7 +162,7 @@ extern "C"
     {
       std::string ferror_message = (std::ostringstream{} << "Could not load model file: " << e.what()).str();
 
-      tc->last_error = TC_LOADMODEL_ERROR;
+      tc->last_error_code = TC_LOADMODEL_ERROR;
       std::memcpy(
           tc->last_error_message,
           ferror_message.c_str(),
@@ -177,7 +177,7 @@ extern "C"
 
     if (tc->model_context == nullptr)
     {
-      tc->last_error = TC_INVWHISCTX_ERROR;
+      tc->last_error_code = TC_INVWHISCTX_ERROR;
       std::strcpy(
           tc->last_error_message,
           "Could not initialize whisper context.");
@@ -206,14 +206,14 @@ extern "C"
     const char *text_segment = nullptr;
     std::size_t writable_len = 0;
 
-    if (tc->last_error != TC_OK)
+  if (tc->last_error_code != TC_OK)
     {
-      return tc->last_error;
+      return tc->last_error_code;
     }
 
     if (tc->model_context == nullptr)
     {
-      tc->last_error = TC_INVWHISCTX_ERROR;
+      tc->last_error_code = TC_INVWHISCTX_ERROR;
       std::strcpy(tc->last_error_message, "Model context is not initialied.");
       return TC_INVWHISCTX_ERROR;
     }
@@ -224,7 +224,7 @@ extern "C"
     }
     catch (const std::exception &e)
     {
-      tc->last_error = TC_LOADSPEACH_ERROR;
+      tc->last_error_code = TC_LOADSPEACH_ERROR;
       std::strcpy(tc->last_error_message, "Could not load speach audio file.");
       return TC_LOADSPEACH_ERROR;
     }
@@ -233,7 +233,7 @@ extern "C"
     wret = whisper_full(tc->model_context, wparams, speach_file.data(), speach_file.size());
     if (wret != 0)
     {
-      tc->last_error = TC_SPEACHGEN_ERROR;
+      tc->last_error_code = TC_SPEACHGEN_ERROR;
       std::strcpy(tc->last_error_message, "whisper_full failed.");
       return TC_SPEACHGEN_ERROR;
     }

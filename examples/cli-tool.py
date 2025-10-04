@@ -4,7 +4,7 @@ import whisperpy
 from whisperpy import WhisperModel
 
 # Input file
-speach_file = input("Enter an audio file to transcribe: ").strip()
+speach_file = input("Enter an audio file to transcribe:").strip()
 if not speach_file:
   print("Taking default input file.")
   speach_file = "./inputs/jfk.pcmf32"

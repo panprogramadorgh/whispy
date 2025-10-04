@@ -1,93 +1,13 @@
-from sys import exit, stderr
-from os import getenv, path
-from os.path import dirname, join
-import ctypes
+import ctypes 
+from wrapper import WhisperpyLoader, TranscriptContext
+from utils import WhisperInitError, WhisperTextGenError, fetch_model_path, format_tc_error
 
-IS_DEVELOPMENT = False
-WHISPERPY_LIBRARY_MODE = getenv("WHISPERPY_LIBRARY_MODE")
-if WHISPERPY_LIBRARY_MODE and isinstance(WHISPERPY_LIBRARY_MODE, str):
-  IS_DEVELOPMENT = WHISPERPY_LIBRARY_MODE.strip().lower().split()[0].startswith("dev")
-
-
-def get_whisperpy_backend_library_path():
-  project_root = path.dirname(path.dirname(__file__))
-  backend_dir =  {
-    True: path.join(project_root, "cmake-dev-build"), # Is development
-    False: path.join(project_root, "cmake-build") # Is not development
-  }[IS_DEVELOPMENT]
-  backend_lib_path = path.join(backend_dir, "libwhisperpy.so")
-  if not path.exists(backend_lib_path):
-    raise RuntimeError(f"Unable to find whisperpy backend library: {backend_lib_path}")
-  return backend_lib_path
-
-
-# User defined types
-
-class _TranscriptContext(ctypes.Structure):
-  _fields_ = [
-    ("last_error", ctypes.c_uint8),
-    ("last_error_message", ctypes.c_char_p),
-    ("model_context", ctypes.c_void_p)
-  ]
-
-# Function prototyping
-
-
-_libwhisperpy: ctypes.CDLL | None = None
-libwhisperpy_ld_error: str | None = None
-try:
-  _libwhisperpy = ctypes.CDLL(get_whisperpy_backend_library_path())
-except Exception as error:
-  libwhisperpy_ld_error = f"Unable to load whisperpy backend library: {error}"
-else:
-  _libwhisperpy.transcript_context_make.argtypes = [ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
-  _libwhisperpy.transcript_context_make.restype = ctypes.c_uint8
-
-  _libwhisperpy.transcript_context_free.argtypes = [ctypes.POINTER(_TranscriptContext)]
-  _libwhisperpy.transcript_context_free.restype = ctypes.c_uint8
-
-  _libwhisperpy.speach_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(_TranscriptContext), ctypes.c_char_p]
-  _libwhisperpy.speach_to_text.restype = ctypes.c_uint8
-
-# Internal utils
-
-def _format_tc_error(tc: _TranscriptContext, context: str | None = None):
-  message = ""
-  if context is not None:
-    message += f"{context}: "
-
-  if tc.last_error != 0:
-    message += str(tc.last_error_message, encoding="utf-8", errors="#")
-
-  last_error = int(tc.last_error)
-  message += f" ({last_error})"
-  
-  return message
-
-_MODELS = {
-  "base": bytes(join(dirname(__file__), "backend", "whisper.cpp", "models", "ggml-base.bin"), encoding="utf-8")
-}
-
-def _fetch_model_path(name: str):
-  return _MODELS.get(name)
-
-# API
-
-class WhisperInitError(RuntimeError):
-  def __init__(self, detail: str | None):
-    super().__init__(detail)
-
-class WhisperTextGenError(RuntimeError):
-  def __init__(self, detail: str | None):
-    super().__init__(detail)
-
-# TODO: Select model name istead of the path
 class WhisperModel:
   """
   A python wrapper class over the whisper.cpp library.
   """
   def __init__(self, model_name: str):
-    """_summary_
+    """Simple clas
 
     Args:
         model_path: Anything used to construct a utf-8 bytes object.
@@ -95,17 +15,19 @@ class WhisperModel:
     Raises:
         RuntimeError: If the underlying C api detects an error.
     """
-    if libwhisperpy_ld_error is not None:
-      raise WhisperInitError(f"Model initialization error: {libwhisperpy_ld_error}")
+    loader = WhisperpyLoader()
+    if not loader:
+      raise WhisperInitError(repr(loader))  
+    self._client  = loader.get()
 
-    model_path = _fetch_model_path(model_name)
+    model_path = fetch_model_path(model_name)
     if model_path is None:
-      raise WhisperInitError("No such model name.")
+      raise WhisperInitError("No such model name")
 
-    self._tc = _TranscriptContext()
-    make_result = _libwhisperpy.transcript_context_make(ctypes.pointer(self._tc), model_path)
+    self._tc = TranscriptContext()
+    make_result: int = self._client.transcript_context_make(ctypes.pointer(self._tc), model_path)
     if make_result != 0:
-      raise WhisperInitError(_format_tc_error(self._tc, "Model initialization error"))
+      raise WhisperInitError(fetch_model_path(self._tc))
   
   def speach_to_text(self, speach_path: str, max_text_size: int = (1 << 10) * 4):
     """Returns a string with the transcription of the speach.
@@ -115,9 +37,9 @@ class WhisperModel:
     """
     text = (ctypes.c_char * max_text_size)()
 
-    speach_result = _libwhisperpy.speach_to_text(text, max_text_size, self._tc, bytes(speach_path, encoding="utf-8"))
+    speach_result: int = self._client.speach_to_text(text, max_text_size, self._tc, bytes(speach_path, encoding="utf-8"))
     if speach_result != 0:
-      raise WhisperTextGenError(_format_tc_error(self._tc, "Speach to text error"))
+      raise WhisperTextGenError(format_tc_error(self._tc))
 
     encoded_text =  str(memoryview(text), encoding="utf-8")
     return encoded_text[:encoded_text.find('\0')]

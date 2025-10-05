@@ -3,7 +3,4 @@ __pycache__
 build
 *build
 *.build.*
-
-src/backend/whisper.cpp
-
 inputs/*

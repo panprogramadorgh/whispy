@@ -134,8 +134,6 @@
 
 */
 
-const std::uint8_t tc_error_message_length = 128;
-
 extern "C"
 {
   tcontext_state transcript_context_make(transcript_context *tc, const char *model_path)
@@ -160,13 +158,11 @@ extern "C"
     }
     catch (const std::exception &e)
     {
-      std::string ferror_message = (std::ostringstream{} << "Could not load model file: " << e.what()).str();
-
       tc->last_error_code = TC_LOADMODEL_ERROR;
       std::memcpy(
           tc->last_error_message,
-          ferror_message.c_str(),
-          std::min(ferror_message.size(), static_cast<std::size_t>(tc_error_message_length)));
+          e.what(),
+          std::min(std::strlen(e.what()) + 1, tc_error_message_length));
       return TC_LOADMODEL_ERROR;
     }
 
@@ -206,7 +202,7 @@ extern "C"
     const char *text_segment = nullptr;
     std::size_t writable_len = 0;
 
-  if (tc->last_error_code != TC_OK)
+    if (tc->last_error_code != TC_OK)
     {
       return tc->last_error_code;
     }
@@ -225,7 +221,10 @@ extern "C"
     catch (const std::exception &e)
     {
       tc->last_error_code = TC_LOADSPEECH_ERROR;
-      std::strcpy(tc->last_error_message, "Could not load speech audio file.");
+      std::memcpy(
+          tc->last_error_message,
+          e.what(),
+          std::min(std::strlen(e.what()) + 1, tc_error_message_length));
       return TC_LOADSPEECH_ERROR;
     }
 

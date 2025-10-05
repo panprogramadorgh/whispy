@@ -36,7 +36,7 @@ extern "C"
     TC_SPEECHGEN_ERROR
   };
 
-  extern const std::uint8_t tc_error_message_length;
+  extern constexpr const std::size_t tc_error_message_length = 512;
 
   struct transcript_context
   {

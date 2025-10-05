@@ -14,6 +14,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.tester
+    command: sh -c "./tests/runall.sh"
     volumes:
       - .:/app
     environment:

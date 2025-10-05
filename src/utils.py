@@ -23,12 +23,12 @@ def format_tc_error(tc: TranscriptContext):
 
   Returns:
       str: A formatted string with the error message.
-  """
+  """   
 
   message = ""
   if tc.last_error_code != 0:
-    message += str(tc.last_error_message, encoding="utf-8", errors="#")
-  message += f" ({int(tc.last_error_code)})"
+    message += str(tc.last_error_message, encoding="utf-8")
+  message += f" (tcontext_state={int(tc.last_error_code)})"
   return message
 
 

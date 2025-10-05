@@ -4,10 +4,10 @@ import whisperpy
 from whisperpy import WhisperModel
 
 # Input file
-speach_file = input("Enter an audio file to transcribe:").strip()
-if not speach_file:
+speech_file = input("Enter an audio file to transcribe: ").strip()
+if not speech_file:
   print("Taking default input file.")
-  speach_file = "./inputs/jfk.pcmf32"
+  speech_file = "./inputs/jfk.pcmf32"
 
 # Init model
 model_config = {
@@ -24,7 +24,7 @@ except whisperpy.WhisperInitError as error:
 # Transcribe
 text: str | None = None
 try:
-  text = model.speach_to_text(speach_file, max_text_size=4096).strip()
+  text = model.speech_to_text(speech_file, max_text_size=4096).strip()
 except whisperpy.WhisperTextGenError as error:
   sys.stderr.write(str(error) + '\n')
   sys.exit(1)

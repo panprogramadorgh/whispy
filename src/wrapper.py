@@ -14,7 +14,7 @@ def get_whisperpy_backend_library_path():
     True: path.join(project_root, "cmake-dev-build"), # Is development
     False: path.join(project_root, "cmake-build") # Is not development
   }[IS_DEVELOPMENT]
-  backend_lib_path = path.join(backend_dir, "libwhisperpy.so")
+  backend_lib_path = path.join(backend_dir, "lib", "libwhisperpy.so")
   if not path.exists(backend_lib_path):
     raise RuntimeError(f"Unable to find whisperpy backend library: {backend_lib_path}")
   return backend_lib_path
@@ -43,8 +43,8 @@ else:
   libwhisperpy.transcript_context_free.argtypes = [ctypes.POINTER(TranscriptContext)]
   libwhisperpy.transcript_context_free.restype = ctypes.c_uint8
 
-  libwhisperpy.speach_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(TranscriptContext), ctypes.c_char_p]
-  libwhisperpy.speach_to_text.restype = ctypes.c_uint8
+  libwhisperpy.speech_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(TranscriptContext), ctypes.c_char_p]
+  libwhisperpy.speech_to_text.restype = ctypes.c_uint8
 
 class WhisperpyLoader:
   def __init__(self):

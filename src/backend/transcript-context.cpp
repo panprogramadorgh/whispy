@@ -197,9 +197,9 @@ extern "C"
       whisper_free(tc->model_context);
   }
 
-  tcontext_state speach_to_text(char *text, std::size_t text_size, transcript_context *tc, const char *speach_path)
+  tcontext_state speech_to_text(char *text, std::size_t text_size, transcript_context *tc, const char *speech_path)
   {
-    std::vector<float> speach_file;
+    std::vector<float> speech_file;
     std::size_t text_pos = 0;
 
     int wret = 0, nsegments = 0;
@@ -220,22 +220,22 @@ extern "C"
 
     try
     {
-      speach_file = load_binary_data<float>(speach_path);
+      speech_file = load_binary_data<float>(speech_path);
     }
     catch (const std::exception &e)
     {
-      tc->last_error_code = TC_LOADSPEACH_ERROR;
-      std::strcpy(tc->last_error_message, "Could not load speach audio file.");
-      return TC_LOADSPEACH_ERROR;
+      tc->last_error_code = TC_LOADSPEECH_ERROR;
+      std::strcpy(tc->last_error_message, "Could not load speech audio file.");
+      return TC_LOADSPEECH_ERROR;
     }
 
     whisper_full_params wparams = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
-    wret = whisper_full(tc->model_context, wparams, speach_file.data(), speach_file.size());
+    wret = whisper_full(tc->model_context, wparams, speech_file.data(), speech_file.size());
     if (wret != 0)
     {
-      tc->last_error_code = TC_SPEACHGEN_ERROR;
+      tc->last_error_code = TC_SPEECHGEN_ERROR;
       std::strcpy(tc->last_error_message, "whisper_full failed.");
-      return TC_SPEACHGEN_ERROR;
+      return TC_SPEECHGEN_ERROR;
     }
 
     nsegments = whisper_full_n_segments(tc->model_context);

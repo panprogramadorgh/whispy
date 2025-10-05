@@ -10,7 +10,7 @@ int main()
   transcript_context_make(&ctx, "./src/backend/whisper.cpp/models/ggml-base.bin");
   std::cout << "Transcript context was initialized" << '\n';
 
-  tcontext_state ret = speach_to_text(text, 1024, &ctx, "./inputs/jfk.pcmf32");
+  tcontext_state ret = speech_to_text(text, 1024, &ctx, "./inputs/jfk.pcmf32");
   if (ret != TC_OK)
   {
     std::cerr << ctx.last_error_message << ": " << ctx.last_error_code << '\n';

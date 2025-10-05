@@ -11,7 +11,7 @@ class WhisperInitError(RuntimeError):
 
 class WhisperTextGenError(RuntimeError):
   def __init__(self, detail: str | None):
-    super().__init__(f"Speach to text error: {detail}")
+    super().__init__(f"Speech to text error: {detail}")
 
 
 def format_tc_error(tc: TranscriptContext):
@@ -26,13 +26,9 @@ def format_tc_error(tc: TranscriptContext):
   """
 
   message = ""
-
   if tc.last_error_code != 0:
-    message += str(tc.last_error_code_message, encoding="utf-8", errors="#")
-
-  last_error_code = int(tc.last_error_code)
-  message += f" ({last_error_code})"
-  
+    message += str(tc.last_error_message, encoding="utf-8", errors="#")
+  message += f" ({int(tc.last_error_code)})"
   return message
 
 

@@ -29,16 +29,16 @@ class WhisperModel:
     if make_result != 0:
       raise WhisperInitError(fetch_model_path(self._tc))
   
-  def speach_to_text(self, speach_path: str, max_text_size: int = (1 << 10) * 4):
-    """Returns a string with the transcription of the speach.
+  def speech_to_text(self, speech_path: str, max_text_size: int = (1 << 10) * 4):
+    """Returns a string with the transcription of the speech.
 
     Args:
-        speach_path: Anythin used to construct a utf-8 bytes object. 
+        speech_path: Anythin used to construct a utf-8 bytes object. 
     """
     text = (ctypes.c_char * max_text_size)()
 
-    speach_result: int = self._client.speach_to_text(text, max_text_size, self._tc, bytes(speach_path, encoding="utf-8"))
-    if speach_result != 0:
+    speech_result: int = self._client.speech_to_text(text, max_text_size, self._tc, bytes(speech_path, encoding="utf-8"))
+    if speech_result != 0:
       raise WhisperTextGenError(format_tc_error(self._tc))
 
     encoded_text =  str(memoryview(text), encoding="utf-8")

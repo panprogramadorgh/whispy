@@ -12,21 +12,6 @@
 #include "utils.tpp"
 
 /**
-  struct whisper_context_params {
-      bool  use_gpu;
-      bool  flash_attn;
-      int   gpu_device;  // cuda device
-
-      // [experimental] token-level timestamps with dtw
-      bool dtw_token_timestamps;
-      enum whisper_alignment_heads_preset dtw_aheads_preset;
-
-      int dtw_n_top;
-      struct whisper_aheads dtw_aheads;
-
-      size_t dtw_mem_size; // todo: remove
-  };
-
   struct whisper_full_params {
       enum whisper_sampling_strategy strategy;
 

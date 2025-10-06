@@ -2,6 +2,30 @@ import ctypes
 from wrapper import WhisperpyLoader, TranscriptContext
 from utils import WhisperInitError, WhisperTextGenError, fetch_model_path, format_tc_error
 
+
+class ModelParams:
+  """Whisper model parameters.
+  """
+  def __init__(self):
+    loader = WhisperpyLoader()
+    if not loader:
+      raise WhisperInitError(str(loader))
+    self._libwhisperpy = loader.get()
+
+    # TODO: Allow users to configure the return value of `whisper_context_default_params`
+
+class SpeechParams:
+  """Speech to text parameters.
+  """
+  def __init__(self):   
+    loader = WhisperpyLoader()
+    if not loader:
+      raise WhisperInitError(str(loader))
+    self._libwhisperpy = loader.get()
+
+    # TODO: Allow users to configure `whisper_full` behaviour.
+
+
 class WhisperModel:
   """
   A python wrapper class over the whisper.cpp library.
@@ -17,15 +41,15 @@ class WhisperModel:
     """
     loader = WhisperpyLoader()
     if not loader:
-      raise WhisperInitError(loader.loading_error)  
-    self._client  = loader.get()
+      raise WhisperInitError(str(loader))
+    self._libwhisperpy = loader.get()
 
     model_path = fetch_model_path(model_name)
     if model_path is None:
       raise WhisperInitError("No such model name")
 
     self._tc = TranscriptContext()
-    make_result: int = self._client.transcript_context_make(ctypes.pointer(self._tc), model_path)
+    make_result: int = self._libwhisperpy.transcript_context_make(ctypes.pointer(self._tc), model_path)
     if make_result != 0:
       raise WhisperInitError(fetch_model_path(self._tc))
   
@@ -37,7 +61,7 @@ class WhisperModel:
     """
     text = (ctypes.c_char * max_text_size)()
 
-    speech_result: int = self._client.speech_to_text(text, max_text_size, self._tc, bytes(speech_path, encoding="utf-8"))
+    speech_result: int = self._libwhisperpy.speech_to_text(text, max_text_size, self._tc, bytes(speech_path, encoding="utf-8"))
     if speech_result != 0:
       raise WhisperTextGenError(format_tc_error(self._tc))
 

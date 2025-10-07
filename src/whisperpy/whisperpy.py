@@ -1,6 +1,6 @@
 import ctypes 
-from wrapper import WhisperpyLoader, TranscriptContext
-from utils import WhisperInitError, WhisperTextGenError, fetch_model_path, format_tc_error
+from .wrapper import WhisperpyLoader, TranscriptContext
+from .utils import WhisperInitError, WhisperTextGenError, fetch_model_path, format_tc_error
 
 
 class ModelParams:

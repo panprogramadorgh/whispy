@@ -3,21 +3,11 @@ import ctypes
 
 # Library path
 
-IS_DEVELOPMENT = False
-WHISPERPY_LIBRARY_MODE = getenv("WHISPERPY_LIBRARY_MODE")
-if WHISPERPY_LIBRARY_MODE and isinstance(WHISPERPY_LIBRARY_MODE, str):
-  IS_DEVELOPMENT = WHISPERPY_LIBRARY_MODE.strip().lower().split()[0].startswith("dev")
-
-def get_whisperpy_backend_library_path():
-  project_root = path.dirname(path.dirname(__file__))
-  backend_dir =  {
-    True: path.join(project_root, "cmake-dev-build"), # Is development
-    False: path.join(project_root, "cmake-build") # Is not development
-  }[IS_DEVELOPMENT]
-  backend_lib_path = path.join(backend_dir, "lib", "libwhisperpy.so")
-  if not path.exists(backend_lib_path):
-    raise RuntimeError(f"Unable to find whisperpy backend library: {backend_lib_path}")
-  return backend_lib_path
+def get_libwhisperpy_path():
+  libwhisperpy_path = path.join(path.dirname(__file__), "lib", "libwhisperpy.so")
+  if not path.exists(libwhisperpy_path):
+    raise RuntimeError(f"Unable to find whisperpy backend library: {libwhisperpy_path}")
+  return libwhisperpy_path
 
 # User-defined types
 
@@ -112,7 +102,7 @@ class WhisperFullParams(ctypes.Structure):
 libwhisperpy: ctypes.CDLL | None = None,
 libwhisperpy_ld_error: str | None = None
 try:
-  libwhisperpy = ctypes.CDLL(get_whisperpy_backend_library_path())
+  libwhisperpy = ctypes.CDLL(get_libwhisperpy_path())
 except Exception as error:
   libwhisperpy_ld_error = f"Unable to load whisperpy backend library: {error}"
 else:

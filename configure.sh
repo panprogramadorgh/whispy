@@ -1,5 +1,7 @@
 #! /bin/sh
 
+# TODO: Use regular cmake environment variables
+
 # Read env vars
 BTYPE=$WHISPERPY_CMAKE_BUILD_TYPE
 BDIR=$WHISPERPY_CMAKE_BUILD_DIR

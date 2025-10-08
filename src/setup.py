@@ -47,12 +47,14 @@ class CMakeBuild(build_ext):
 
     for ext in self.extensions:
       self.build_extension(ext)
+      print(f"Extension '{ext.name}' is done.")
+
 
   def build_extension(self, ext: CMakeExtension):
     """Configures and builds the backend libraries.
     """
 
-    print("Building", ext.name)
+    print(f"Building extension '{ext.name}'")
 
     cmake_build_dir =  os.path.join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
     """ CMake files
@@ -61,11 +63,13 @@ class CMakeBuild(build_ext):
     os.makedirs(cmake_build_dir, exist_ok=True)
     subprocess.check_call(["cmake", ext.sourcedir], cwd=cmake_build_dir)
     subprocess.check_call(["cmake", "--build", "."], cwd=cmake_build_dir)
-    print()
+
+    self.move_libraries(ext)
   
   def move_libraries(self, ext: CMakeExtension):
     """Moves the C++ libraries inside the package.
     """
+    print(f"Moving '{ext.name}' libraries within the package.")
 
     cmake_build_dir =  os.path.join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
     """ CMake files
@@ -74,28 +78,34 @@ class CMakeBuild(build_ext):
     """whisperpy C++ libraries
     """
 
-    # TODO: Move libraries
+    os.makedirs(package_libraries_path, exist_ok=True)
+
     libraries = [
       "libwhisperpy.so",
-      "src/backend/whisper.cpp/src/libwhisper.so*",
-      "src/backend/whisper.cpp/src/ggml/src/libggml-base.so",
-      "src/backend/whisper.cpp/src/ggml/src/libggml-cpu.so",
-      "src/backend/whisper.cpp/src/ggml/src/libggml.so"
-    ]
 
-    shutil.copy(os.path.join(cmake_build_dir, "libwhisperpy.so"), os.path.join(package_libraries_path))
-    shutil.copy(os.path.join(cmake_build_dir, "src/backend/whisper.cpp/src/libwhisper.so"), os.path.join(package_libraries_path))
-    shutil.copy(os.path.join(cmake_build_dir, "src/backend/whisper.cpp/src/libwhisper.so"), os.path.join(package_libraries_path))
+      "lib/whisper.cpp/src/libwhisper.so",    # symlink
+      "lib/whisper.cpp/src/libwhisper.so.1",  # symlink
+      "lib/whisper.cpp/src/libwhisper.so.1.7.4",
+
+      "lib/whisper.cpp/ggml/src/libggml.so",
+      "lib/whisper.cpp/ggml/src/libggml-base.so",
+      "lib/whisper.cpp/ggml/src/libggml-cpu.so",
+    ]
+    for lib in libraries:
+      shutil.copy(os.path.join(cmake_build_dir, lib), package_libraries_path)
 
 setup(
+  # Metadata
   name="whisperpy",
   version="1.1.1",
   author="panprogramador",
   author_email="",
   description="Speech to text transcriber.",
   long_description="",
-  packages=find_packages("src"),
-  package_dir={"": "src"},
-  ext_modules=[CMakeExtension("whisperpy")],
-  cmdclass=dict(build_ext=CMakeBuild)
+
+  # CMake extensions
+  packages=find_packages(where="src"), # Packages to be distributed goes under "src" directory
+  # package_dir={"": "src"}, # TODO: Remove: Packages are at the same level as "setup.py"
+  ext_modules=[CMakeExtension("whisperpy/libwhisperpy")],
+  cmdclass=dict(build_ext=CMakeBuild),
 )

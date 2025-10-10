@@ -1,8 +1,13 @@
 __pycache__
 .vscode
+
 build
 *build
 *.build.*
 lib
-*egg-info
 dist
+
+env
+.venv
+
+*egg-info

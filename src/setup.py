@@ -1,19 +1,59 @@
-import os
+from typing import Sequence, Protocol, runtime_checkable
+from os.path import join, dirname
+from os import makedirs
 import subprocess
 import re
 import shutil
 
-# Package distribution
 from setuptools import find_packages, Extension, setup
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
+
+
+@runtime_checkable
+class StrConvertible(Protocol):
+  def __str__(self) -> str:
+    ...
+
+class LooseVersion:
+  """Allows to compare two different semver format versions.
+  """
+
+  def __init__(self, sversion: str):
+    self.version: tuple[str] = self.parse(sversion)
+
+  def parse(self, obj: object):
+    if not isinstance(obj, Sequence):
+      raise RuntimeError("Iterable object is expected to be parsed.")
+    ver_segments: tuple[str] = tuple(str(x) for x in obj if isinstance(x, str) and x and x != ".") # type: ignore
+    return ver_segments
+
+
+  def __eq__(self, other: object):
+    other_parsed = self.parse(other)
+    return self.version == other_parsed
+  
+  def __gt__(self, other: object) -> bool:
+    other_parsed = self.parse(other)
+    return self.version > other_parsed
+
+  def __lt__(self, other: object) -> bool:
+    other_parsed = self.parse(other)
+    return self.version < other_parsed
+  
+  def __ge__(self, other: object) -> bool:
+    other_parsed = self.parse(other)
+    return self.version >= other_parsed
+
+  def __le__(self, other: object) -> bool:
+    other_parsed = self.parse(other)
+    return self.version <= other_parsed
 
 REQUIRED_CMAKE_VERSION = "3.16"
 
 def check_cmake_version(minimum_required: str):
   out = subprocess.check_output(["cmake", "--version"])
   coincidences = re.search(r"version\s*([\d.]+)", out.decode())
-  if not len(coincidences.groups()): # It does not match
+  if coincidences is None or not len(coincidences.groups()): # It does not match
     return False
 
   cmake_version = coincidences.group(1)
@@ -30,7 +70,7 @@ class CMakeExtension(Extension):
 
     super().__init__(name, sources=[])  
 
-    self.sourcedir = os.path.dirname(os.path.dirname(__file__)) # Project root
+    self.sourcedir = dirname(dirname(__file__)) # Project root
     """Represents the root directory of the project
     """
 
@@ -56,11 +96,11 @@ class CMakeBuild(build_ext):
 
     print(f"Building extension '{ext.name}'")
 
-    cmake_build_dir =  os.path.join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
+    cmake_build_dir =  join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
     """ CMake files
     """
 
-    os.makedirs(cmake_build_dir, exist_ok=True)
+    makedirs(cmake_build_dir, exist_ok=True)
     subprocess.check_call(["cmake", ext.sourcedir], cwd=cmake_build_dir)
     subprocess.check_call(["cmake", "--build", "."], cwd=cmake_build_dir)
 
@@ -71,14 +111,14 @@ class CMakeBuild(build_ext):
     """
     print(f"Moving '{ext.name}' libraries within the package.")
 
-    cmake_build_dir =  os.path.join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
+    cmake_build_dir =  join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
     """ CMake files
     """
-    package_libraries_path = os.path.join(ext.sourcedir, "src", "whisperpy", "lib")
+    package_libraries_path = join(ext.sourcedir, "src", "whisperpy", "lib")
     """whisperpy C++ libraries
     """
 
-    os.makedirs(package_libraries_path, exist_ok=True)
+    makedirs(package_libraries_path, exist_ok=True)
 
     libraries = [
       "libwhisperpy.so",
@@ -92,7 +132,7 @@ class CMakeBuild(build_ext):
       "lib/whisper.cpp/ggml/src/libggml-cpu.so",
     ]
     for lib in libraries:
-      shutil.copy(os.path.join(cmake_build_dir, lib), package_libraries_path)
+      shutil.copy(join(cmake_build_dir, lib), package_libraries_path)
 
 setup(
   # Metadata
@@ -103,9 +143,16 @@ setup(
   description="Speech to text transcriber.",
   long_description="",
 
+  # Find the package
+  packages=find_packages(where="."),
+  package_dir={"": "."},
+
   # CMake extensions
-  packages=find_packages(where="src"), # Packages to be distributed goes under "src" directory
-  # package_dir={"": "src"}, # TODO: Remove: Packages are at the same level as "setup.py"
   ext_modules=[CMakeExtension("whisperpy/libwhisperpy")],
   cmdclass=dict(build_ext=CMakeBuild),
+
+  # Include libraries
+  package_data={
+    "whisperpy": ["./lib/*"]
+  }
 )

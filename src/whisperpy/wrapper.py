@@ -1,4 +1,4 @@
-from os import getenv, path
+from os import path
 import ctypes
 
 # Library path

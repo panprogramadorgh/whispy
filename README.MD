@@ -66,4 +66,4 @@ So in order to run the tests, you can do:
 python3 -m unittest discover -s ./tests
 ```
 
-> Note: Before running any tests, you have to be carefull since one test may try to install the packages since it could be considered as part of the test.
+> Note: Before running any tests, you have to be careful since one test may try to install the packages since it could be considered as part of the test.

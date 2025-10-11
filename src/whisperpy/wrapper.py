@@ -11,26 +11,26 @@ def get_libwhisperpy_path():
 
 # User-defined types
 
-class TranscriptContext(ctypes.Structure):
+class transcript_context(ctypes.Structure):
   _fields_ = [
     ("last_error_code", ctypes.c_uint8),
     ("last_error_message", ctypes.c_char_p),
     ("model_context", ctypes.c_void_p)
   ]
 
-class DwtAhead(ctypes.Structure):
-  _field_ = [
+class whisper_ahead(ctypes.Structure):
+  _fields_ = [
     ("n_text_layer", ctypes.c_int),
     ("n_head", ctypes.c_int)
   ]
 
-class DwtAheads(ctypes.Structure):
-  _field_ = [
+class whisper_aheads(ctypes.Structure):
+  _fields_ = [
     ("n_heads", ctypes.c_uint64),
-    ("heads", ctypes.POINTER(DwtAhead))
+    ("heads", ctypes.POINTER(whisper_ahead))
   ]
 
-class WhisperContextParams(ctypes.Structure):
+class whisper_context_params(ctypes.Structure):
   _fields_ = [
     ("use_gpu", ctypes.c_bool),
     ("flash_attn", ctypes.c_bool),
@@ -38,12 +38,43 @@ class WhisperContextParams(ctypes.Structure):
     ("dtw_token_timestamps", ctypes.c_bool),
     ("dtw_aheads_preset", ctypes.c_int),
     ("dtw_n_top", ctypes.c_int),
-    ("dtw_aheads", DwtAheads),
+    ("dtw_aheads", whisper_aheads),
     ("dtw_mem_size", ctypes.c_uint64)
   ]
 
-class WhisperFullParams(ctypes.Structure):
-  _fields = [
+class whisper_token_data(ctypes.Structure):
+  _fields_ = [
+    ("id", ctypes.c_int32),
+    ("tid", ctypes.c_int32),
+    ("p", ctypes.c_float),
+    ("plog", ctypes.c_float),
+    ("pt", ctypes.c_float),
+    ("ptsum", ctypes.c_float),
+    ("t0", ctypes.c_int64),
+    ("t1", ctypes.c_int64),
+
+    # [EXPERIMENTAL] Token-level timestamps with DTW
+    # do not use if you haven't computed token-level timestamps
+    # with dtw. Roughly corresponds to the moment in audio in
+    # which the token was output  
+    ("t_dtw", ctypes.c_int64),
+
+    ("vlen", ctypes.c_float)
+  ]
+
+whisper_new_segment_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p)
+
+whisper_progress_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p)
+
+whisper_encoder_begin_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)
+
+whisper_encoder_begin_callback = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)
+
+ggml_abort_callback = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_void_p)
+whisper_logits_filter_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, )
+
+class whisper_full_params(ctypes.Structure):
+  _fields_ = [
     ("strategy", ctypes.c_int),
     ("n_threads", ctypes.c_int),
     ("n_max_text_ctx", ctypes.c_int),
@@ -56,7 +87,7 @@ class WhisperFullParams(ctypes.Structure):
     ("single_segment", ctypes.c_bool),
     ("print_special", ctypes.c_bool),
     ("print_progress", ctypes.c_bool),
-    ("print_realtime", ctypes.c_bool)
+    ("print_realtime", ctypes.c_bool),
     ("print_timestampts", ctypes.c_bool),
 
     # [EXPERIMENTAL] token-level timestampts
@@ -94,7 +125,19 @@ class WhisperFullParams(ctypes.Structure):
     ("logprob_thold", ctypes.c_float),
     ("no_speech_thold", ctypes.c_float),
 
-    # TODO:  Finish
+    ("new_segment_callback", whisper_new_segment_callback),
+    ("new_segment_callback_user_data", ctypes.c_void_p),
+
+    ("progress_callback", whisper_progress_callback),
+    ("new_segment_callback_user_data", ctypes.c_void_p),
+
+    ("encoder_begin_calback", whisper_encoder_begin_callback),
+    ("encoder_begin_callback_user_data", ctypes.c_void_p),
+
+    ("abort_callback", ggml_abort_callback),
+    ("abort_callback_user_data", ctypes.c_void_p),
+
+    # TODO: Finish
   ]
 
 # Load library (singleton)

@@ -1,7 +1,7 @@
 FROM gcc:15.2.0 as builder
 
-ENV WHISPERPY_CMAKE_BUILD_TYPE=Release
-ENV WHISPERPY_CMAKE_BUILD_DIR=cmake-build
+ENV CMAKE_BUILD_TYPE=Release
+ENV CMAKE_BUILD_DIR=cmake-build
 
 RUN apt update && apt install -y cmake make
 

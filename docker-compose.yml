@@ -1,5 +1,5 @@
 services:
-  whisperpy_debug_builder: # Debug build container
+  whispy_debug_builder: # Debug build container
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -10,7 +10,7 @@ services:
       - CMAKE_BUILD_DIR=cmake-dev-build
       - CMAKE_CXX_COMPILER=/usr/local/bin/g++
 
-  whisperpy_deploy_builder: # Release build container
+  whispy_deploy_builder: # Release build container
     build:
       context: .
       dockerfile: ./Dockerfile

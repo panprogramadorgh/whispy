@@ -7,12 +7,12 @@ if [ "$BDIR" = "" ]; then
 fi
 
 cmake --build $BDIR -- -j $(nproc) &&
-mkdir -p ./src/whisperpy/lib
+mkdir -p ./src/whispy/lib
 
-cp $BDIR/libwhisperpy.so ./src/whisperpy/lib &&
-cp $BDIR/lib/whisper.cpp/src/libwhisper.so ./src/whisperpy/lib &&
-cp $BDIR/lib/whisper.cpp/src/libwhisper.so.1 ./src/whisperpy/lib &&
-cp $BDIR/lib/whisper.cpp/src/libwhisper.so.1.7.4 ./src/whisperpy/lib &&
-cp $BDIR/lib/whisper.cpp/ggml/src/libggml.so ./src/whisperpy/lib &&
-cp $BDIR/lib/whisper.cpp/ggml/src/libggml-base.so ./src/whisperpy/lib &&
-cp $BDIR/lib/whisper.cpp/ggml/src/libggml-cpu.so ./src/whisperpy/lib
+cp $BDIR/libwhispy.so ./src/whispy/lib &&
+cp $BDIR/lib/whisper.cpp/src/libwhisper.so ./src/whispy/lib &&
+cp $BDIR/lib/whisper.cpp/src/libwhisper.so.1 ./src/whispy/lib &&
+cp $BDIR/lib/whisper.cpp/src/libwhisper.so.1.7.4 ./src/whispy/lib &&
+cp $BDIR/lib/whisper.cpp/ggml/src/libggml.so ./src/whispy/lib &&
+cp $BDIR/lib/whisper.cpp/ggml/src/libggml-base.so ./src/whispy/lib &&
+cp $BDIR/lib/whisper.cpp/ggml/src/libggml-cpu.so ./src/whispy/lib

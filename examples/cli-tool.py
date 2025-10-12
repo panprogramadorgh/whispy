@@ -1,7 +1,7 @@
 import sys
 sys.path.append("src")
-import whisperpy
-from whisperpy import WhisperModel
+import whispy
+from whispy import WhispyModel
 
 # Input file
 speech_file = input("Enter an audio file to transcribe: ").strip()
@@ -10,22 +10,18 @@ if not speech_file:
   speech_file = "./inputs/jfk.pcmf32"
 
 # Init model
-model_config = {
-  "model_name": "base"
-}
-model: WhisperModel | None = None
-
+model: WhispyModel
 try:
-  model = WhisperModel(**model_config)
-except whisperpy.WhisperInitError as error:
+  model = WhispyModel(model_name="base", params={"use_gpu": False})
+except whispy.WhisperInitError as error:
   sys.stderr.write(str(error) + '\n')
   sys.exit(1)
 
 # Transcribe
-text: str | None = None
+text = ""
 try:
-  text = model.speech_to_text(speech_file, max_text_size=4096).strip()
-except whisperpy.WhisperTextGenError as error:
+  text = model.speech_to_text(speech_file, presset="greedy", params={"n_threads": 4})
+except whispy.WhisperTextGenError as error:
   sys.stderr.write(str(error) + '\n')
   sys.exit(1)
 

@@ -5,4 +5,4 @@ set(TARGET ${PROJECT_NAME})
 
 add_executable(${TARGET} "./main.cpp")
 set_target_properties(${TARGET} PROPERTIES BUILD_RPATH "$ORIGIN/../../lib")
-target_link_libraries(${TARGET} whisperpy)
+target_link_libraries(${TARGET} whispy)

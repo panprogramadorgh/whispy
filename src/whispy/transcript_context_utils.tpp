@@ -5,6 +5,37 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <cstring>
+#include <cmath>
+
+#include "whispy.h"
+
+/**
+ * Stablishes the internal state of `whispy_transcript_context`.
+ * 
+ * @param tc A pointer to a `whispy_transcript_context`. If nullptr is provided, returns `whispy_tc_state::INVWHISCTX_ERROR`.
+ * @param state The numerical state to be set.
+ * @param error_message A character array with contextual info (e.g. internal catched exception messages). If nullptr is provided, the contex's internal message is left as it is.
+ * 
+ * @return Returns the same state that was stablished into the `whispy_transcript_context` unless `tc` is nullptr, in whose case the function returns `whispy_tc_state::INVWHISCTX_ERROR`.
+ */
+whispy_tc_state set_tc_state(whispy_transcript_context *tc, whispy_tc_state state, const char *error_message)
+{
+  std::size_t msg_max_length = 0;
+
+  if (tc == nullptr)
+    return whispy_tc_state::INVWHISCTX_ERROR;
+
+  tc->last_error_code = state;
+  if (tc->last_error_message != nullptr) {
+    msg_max_length = std::min(tc_message_size - 1, std::strlen(error_message));
+    std::memcpy(tc->last_error_message, error_message, msg_max_length);
+    tc->last_error_message[msg_max_length + 1] = '\0';
+  }
+
+  return state;
+}
+
 /**
  * Parses an stream insternal std::ios_base::iostate to text.
  * @param stream Any C++ stream.

@@ -1,0 +1,1 @@
+rm -rf ./cmake-build ./cmake-dev-build ./lib/whisper.cpp/models/ggml-base.bin ./src/build ./src/dist ./src/whispy.egg-info ./src/whispy/lib ./src/whispy/__pycache__  ./src/whispy/models 2&> /dev/null

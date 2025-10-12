@@ -1,17 +1,20 @@
-from os import path
+from os.path import dirname, join, exists
 import ctypes
 
-# Library path
 
-def get_libwhisperpy_path():
-  libwhisperpy_path = path.join(path.dirname(__file__), "lib", "libwhisperpy.so")
-  if not path.exists(libwhisperpy_path):
-    raise RuntimeError(f"Unable to find whisperpy backend library: {libwhisperpy_path}")
-  return libwhisperpy_path
+# TODO: Bind:
+# whisper_full_n_segments
+# whisper_full_get_segment_text
+
+
+# Constants
+
+PACKAGE_ROOT = dirname(dirname(__file__))
+
 
 # User-defined types
 
-class transcript_context(ctypes.Structure):
+class whispy_transcript_context(ctypes.Structure):
   _fields_ = [
     ("last_error_code", ctypes.c_uint8),
     ("last_error_message", ctypes.c_char_p),
@@ -71,7 +74,8 @@ whisper_encoder_begin_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.
 whisper_encoder_begin_callback = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)
 
 ggml_abort_callback = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_void_p)
-whisper_logits_filter_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, )
+
+whisper_logits_filter_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(whisper_token_data), ctypes.c_int, ctypes.POINTER(ctypes.c_float), ctypes.c_void_p)
 
 class whisper_full_params(ctypes.Structure):
   _fields_ = [
@@ -131,56 +135,78 @@ class whisper_full_params(ctypes.Structure):
     ("progress_callback", whisper_progress_callback),
     ("new_segment_callback_user_data", ctypes.c_void_p),
 
-    ("encoder_begin_calback", whisper_encoder_begin_callback),
+    ("encoder_begin_callback", whisper_encoder_begin_callback),
     ("encoder_begin_callback_user_data", ctypes.c_void_p),
 
     ("abort_callback", ggml_abort_callback),
     ("abort_callback_user_data", ctypes.c_void_p),
 
-    # TODO: Finish
+    ("logits_filter_callback", whisper_logits_filter_callback),
+    ("logits_filter_callback_user_data", ctypes.c_void_p),
+
+    ("grammar_rules", ctypes.POINTER(ctypes.c_void_p)),
+    ("n_grammar_rules", ctypes.c_uint64),
+    ("i_start_rule", ctypes.c_uint64),
+    ("grammar_penalty", ctypes.c_float)
   ]
 
-# Load library (singleton)
+# Library load utils
 
-libwhisperpy: ctypes.CDLL | None = None,
-libwhisperpy_ld_error: str | None = None
-try:
-  libwhisperpy = ctypes.CDLL(get_libwhisperpy_path())
-except Exception as error:
-  libwhisperpy_ld_error = f"Unable to load whisperpy backend library: {error}"
-else:
-  # Transcript context bindings
-  libwhisperpy.transcript_context_make.argtypes = [ctypes.POINTER(TranscriptContext), ctypes.c_char_p]
-  libwhisperpy.transcript_context_make.restype = ctypes.c_uint8
+def get_libwhispy_path():
+  libwhispy_path = join(PACKAGE_ROOT, "lib", "libwhispy.so")
+  if not exists(libwhispy_path):
+    raise RuntimeError(f"Unable to find whispy backend library: {libwhispy_path}")
+  return libwhispy_path
 
-  libwhisperpy.transcript_context_free.argtypes = [ctypes.POINTER(TranscriptContext)]
-  libwhisperpy.transcript_context_free.restype = ctypes.c_uint8
-
-  libwhisperpy.speech_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(TranscriptContext), ctypes.c_char_p]
-  libwhisperpy.speech_to_text.restype = ctypes.c_uint8
-
-  # whisper.cpp bindings
-  libwhisperpy.whisper_context_default_params.argtypes = []
-  libwhisperpy.whisper_context_default_params.restype = WhisperContextParams
-
-  libwhisperpy.whisper_full_default_params.argtypes = ctypes.c_int
-  libwhisperpy.whisper_full_default_params.restype = WhisperFullParams
-  
-
-class WhisperpyLoader:
-  """Allows to gain access to `libwhisperpy.so` `ctypes.CDLL` singleton instance.
+class LibWhispy:
+  """Loads the backend library `libwhispy.so` using `ctypes.CDLL`.
   """
   def __init__(self):
-    self._lib = libwhisperpy
-    self._loading_error = libwhisperpy_ld_error
-  
-  def get(self):
-    if self._loading_error is not None:
+    self._loading_error = ""
+    try:
+      self._lib_path = get_libwhispy_path()
+      self._lib = ctypes.CDLL(self._lib_path)
+    except Exception as e:
+      self._loading_error = str(e)
+    else:
+      self._bind_c_api()
+
+  def _bind_c_api(self):
+    self._lib.whispy_tc_make.argtypes = [ctypes.POINTER(whispy_transcript_context), ctypes.c_char_p, whisper_context_params]
+    self._lib.whispy_tc_make.restype = ctypes.c_int
+
+    self._lib.whispy_tc_free.argtypes = [ctypes.POINTER(whispy_transcript_context)]
+    self._lib.whispy_tc_free.restype = None
+
+    self._lib.whispy_speech_to_text.argtypes = [ctypes.c_char_p, ctypes.c_uint64, ctypes.POINTER(whispy_transcript_context), ctypes.c_char_p, whisper_full_params]
+    self._lib.whispy_speech_to_text.restype = ctypes.c_int
+
+    self._lib.whisper_context_default_params.argtypes = []
+    self._lib.whisper_context_default_params.restype = whisper_context_params
+
+    self._lib.whisper_full_default_params.argtypes = [ctypes.c_int]
+    self._lib.whisper_full_default_params.restype = whisper_full_params
+
+  def dll(self):
+    """Returns an instance of `ctypes.CDLL` with backend library loaded.
+
+    Raises:
+        RuntimeError: Throws in case there were an error loading the library and the consumer insists getting it.
+
+    Returns:
+        ctypes.CDLL: The backend shared library.
+    """
+    if len(self._loading_error):
       raise RuntimeError(self._loading_error)
     return self._lib
-
-  def __str__(self):
-    return self._loading_error if self._loading_error is not None else ""
+  
+  @property 
+  def lib_path(self):
+    return self._lib_path
+  
+  @property 
+  def loading_error(self):
+    return self._loading_error
 
   def __bool__(self):
-    return self._loading_error is None
+    return len(self._loading_error) == 0

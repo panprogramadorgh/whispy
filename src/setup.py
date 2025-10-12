@@ -1,4 +1,4 @@
-from typing import Sequence, Protocol, runtime_checkable
+from typing import Sequence, Callable, Any
 from os.path import join, dirname
 from os import makedirs
 import subprocess
@@ -9,10 +9,14 @@ from setuptools import find_packages, Extension, setup
 from setuptools.command.build_ext import build_ext
 
 
-@runtime_checkable
-class StrConvertible(Protocol):
-  def __str__(self) -> str:
-    ...
+# TODO: Download the model file.
+
+# Constants
+
+PROJECT_ROOT = dirname(dirname(__file__))
+
+
+# CMake versions 
 
 class LooseVersion:
   """Allows to compare two different semver format versions.
@@ -60,23 +64,29 @@ def check_cmake_version(minimum_required: str):
   return LooseVersion(minimum_required) <= cmake_version
 
 
+# CMake extensions
+
 class CMakeExtension(Extension):
-  def __init__(self, name: str):
+  def __init__(self, name: str, libraries: None | list[str] = None, on_finish: Callable[..., Any] | None = None):
     """CMake C++ module extension
 
     Args:
         name (str): The name of the module extension
     """
 
-    super().__init__(name, sources=[])  
+    super().__init__(name, sources=[], libraries=libraries)  
 
-    self.sourcedir = dirname(dirname(__file__)) # Project root
+    self.sourcedir = PROJECT_ROOT
     """Represents the root directory of the project
     """
 
-class CMakeBuild(build_ext):
-  """_summary_
+    self.on_finish = on_finish
+    """A post compilation callback to be executed.
+    """
 
+
+class CMakeBuild(build_ext):
+  """
   Args:
       build_ext (buld_ext): Used to build `CMakeExtension`s.
   """
@@ -88,6 +98,13 @@ class CMakeBuild(build_ext):
     for ext in self.extensions:
       self.build_extension(ext)
       print(f"Extension '{ext.name}' is done.")
+
+      self.move_libraries(ext)
+      print(f"Libraries for '{ext.name}' were moved.")
+
+      ext.on_finish()
+      print(f"'on_finish' callback is done.")
+
 
 
   def build_extension(self, ext: CMakeExtension):
@@ -103,9 +120,8 @@ class CMakeBuild(build_ext):
     makedirs(cmake_build_dir, exist_ok=True)
     subprocess.check_call(["cmake", ext.sourcedir], cwd=cmake_build_dir)
     subprocess.check_call(["cmake", "--build", "."], cwd=cmake_build_dir)
+ 
 
-    self.move_libraries(ext)
-  
   def move_libraries(self, ext: CMakeExtension):
     """Moves the C++ libraries inside the package.
     """
@@ -114,30 +130,29 @@ class CMakeBuild(build_ext):
     cmake_build_dir =  join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
     """ CMake files
     """
-    package_libraries_path = join(ext.sourcedir, "src", "whisperpy", "lib")
-    """whisperpy C++ libraries
+    package_libraries_path = join(ext.sourcedir, "src", "whispy", "lib")
+    """whispy C++ libraries
     """
 
     makedirs(package_libraries_path, exist_ok=True)
 
-    libraries = [
-      "libwhisperpy.so",
-
-      "lib/whisper.cpp/src/libwhisper.so",    # symlink
-      "lib/whisper.cpp/src/libwhisper.so.1",  # symlink
-      "lib/whisper.cpp/src/libwhisper.so.1.7.4",
-
-      "lib/whisper.cpp/ggml/src/libggml.so",
-      "lib/whisper.cpp/ggml/src/libggml-base.so",
-      "lib/whisper.cpp/ggml/src/libggml-cpu.so",
-    ]
-    for lib in libraries:
+    for lib in ext.libraries:
       shutil.copy(join(cmake_build_dir, lib), package_libraries_path)
+    
+
+# TODO: Finish
+def download_ggml_model(model_name: str):
+  script_path = join(PROJECT_ROOT, "lib", "whisper.cpp", "models", "download-ggml-model.sh")
+  subprocess.check_call([script_path, model_name])
+
+  models_dir = join(PROJECT_ROOT, "src", "whispy", "models")
+  makedirs(models_dir)
+  subprocess.check_call(["cp", ])
 
 setup(
   # Metadata
-  name="whisperpy",
-  version="1.1.1",
+  name="whispy",
+  version="2.0.0",
   author="panprogramador",
   author_email="",
   description="Speech to text transcriber.",
@@ -148,11 +163,25 @@ setup(
   package_dir={"": "."},
 
   # CMake extensions
-  ext_modules=[CMakeExtension("whisperpy/libwhisperpy")],
+  ext_modules=[
+    CMakeExtension("whispy/libwhispy", [ 
+        "libwhispy.so",
+
+        "lib/whisper.cpp/src/libwhisper.so",    # symlink
+        "lib/whisper.cpp/src/libwhisper.so.1",  # symlink
+        "lib/whisper.cpp/src/libwhisper.so.1.7.4",
+
+        "lib/whisper.cpp/ggml/src/libggml.so",
+        "lib/whisper.cpp/ggml/src/libggml-base.so",
+        "lib/whisper.cpp/ggml/src/libggml-cpu.so", 
+      ],
+      on_finish=lambda: download_ggml_model(model_name="base")
+    )
+  ],
   cmdclass=dict(build_ext=CMakeBuild),
 
   # Include libraries
   package_data={
-    "whisperpy": ["./lib/*"]
+    "whispy": ["./lib/*", "./models/*"],
   }
 )

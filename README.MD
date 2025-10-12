@@ -1,9 +1,9 @@
-# WhisperPy
+# WhisPy
 
 ## Easy Installation
 
 ```sh
-pip install whisperpy
+pip install whispy
 ```
 
 ## Manual Installation from Source
@@ -17,7 +17,7 @@ git pull --rebase origin main
 Or clone if it wasn't already:
 
 ```sh
-git clone git@github.com:panprogramadorgh/whisperpy.git
+git clone git@github.com:panprogramadorgh/whispy.git
 ```
 
 Initialize and update the submodules if needed:
@@ -48,7 +48,7 @@ There is a docker compose file in the project, so you can just run the following
 
 ```sh
 # This will raise a container that compiles the C++ backend for you.
-docker compose up whisperpy_deploy_builder
+docker compose up whispy_deploy_builder
 ```
 
 > Note: Be carefull with docker builds because it uses a modern version of GCC that may require the latest versions of both libc and libstdc++.

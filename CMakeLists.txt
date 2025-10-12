@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
-project(whisperpy)
+project(whispy)
 
 set(CMAKE_BUILD_RPATH "$ORIGIN")
 
-# Config whisperpy wrapper
+# Config whispy wrapper
 set(TARGET ${PROJECT_NAME})
-file(GLOB BACKEND_SOURCES "${CMAKE_SOURCE_DIR}/src/whisperpy/*.cpp")
+file(GLOB BACKEND_SOURCES "${CMAKE_SOURCE_DIR}/src/whispy/*.cpp")
 add_library(${TARGET} SHARED ${BACKEND_SOURCES})
-target_include_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/src/whisperpy")
+target_include_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/src/whispy")
 target_compile_features(${TARGET} PUBLIC cxx_std_23)
 
 # Config whisper.cpp

@@ -15,42 +15,7 @@ from .bindings import\
 
 # Constants
 
-PACKAGE_ROOT = dirname(dirname(__file__))
-
-
-# Data type parsing
-
-int8 = int
-int16 = int
-int32 = int
-int64 = int
-
-uint8 = int
-uint16 = int
-uint32 = int
-uint64 = int
-
-double = float
-
-PYTYPE_TO_CTYPE_PARSE_MAP: dict[type, type] = {
-  bool: ctypes.c_bool,
-
-  int8: ctypes.c_int8,
-  int16: ctypes.c_int16,
-  int32: ctypes.c_int32,
-  int64: ctypes.c_int64,
-
-  uint8: ctypes.c_uint8,
-  uint16: ctypes.c_uint16,
-  uint32: ctypes.c_uint32,
-  uint64: ctypes.c_uint64,
-
-  float: ctypes.c_float,
-  double: ctypes.c_double
-}
-
-def is_ctypes_class(cls: object):
-  return isinstance(cls, type) and isinstance(cls, ctypes._SimpleCData) # type: ignore
+PACKAGE_ROOT = dirname(__file__)
 
 
 # Model selection 
@@ -115,14 +80,7 @@ def create_whisper_context_params(lib_loader: LibWhispy, partial_params: None | 
     return context_params
 
   for key, value in partial_params.items():
-    param_type = ModelParams.__annotations__[key]
-    param_ctype = PYTYPE_TO_CTYPE_PARSE_MAP.get(param_type)
-
-    if param_ctype is None and\
-      not is_ctypes_class(param_type):
-      raise TypeError(f"Unsupported data type for '{key}' key: {param_type}")
-
-    context_params[key] = param_ctype(value) if param_ctype is not None else value
+    setattr(context_params, key, value)
       
   return context_params
 
@@ -189,14 +147,7 @@ def create_whisper_full_params(lib_loader: LibWhispy, sampling: Literal["greedy"
     return wparams
     
   for key, value in partial_params.items():   
-    param_type = SpeechToTextParams.__annotations__[key]
-    param_ctype = PYTYPE_TO_CTYPE_PARSE_MAP.get(param_type)
-
-    if param_ctype is None and\
-      not is_ctypes_class(param_type):
-      raise TypeError(f"Unsupported data type for '{key}' key: {param_type}")
-
-    wparams[key] = param_ctype(value) if param_ctype is not None else value
+    setattr(wparams, key, value)
   
   return wparams
 

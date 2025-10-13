@@ -70,6 +70,7 @@ extern "C"
   {
     if (tc == nullptr)
       return;
+    tc->last_error_code = whispy_tc_state::FREEDCTX_ERROR;
     if (tc->last_error_message != nullptr)
       delete tc->last_error_message;
     if (tc->model_context != nullptr)

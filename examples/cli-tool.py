@@ -1,5 +1,4 @@
 import sys
-sys.path.append("src")
 import whispy
 from whispy import WhispyModel
 
@@ -20,11 +19,12 @@ except whispy.WhisperInitError as error:
 # Transcribe
 text = ""
 try:
-  text = model.speech_to_text(speech_file, presset="greedy", params={"n_threads": 4})
+  text = model.speech_to_text(speech_file, sampling="greedy", params={"n_threads": 20})
 except whispy.WhisperTextGenError as error:
   sys.stderr.write(str(error) + '\n')
   sys.exit(1)
 
+model.destroy()
 print("Transcript result:\n" + text)
 
 # Save the file

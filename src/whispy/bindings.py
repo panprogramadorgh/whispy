@@ -9,7 +9,7 @@ import ctypes
 
 # Constants
 
-PACKAGE_ROOT = dirname(dirname(__file__))
+PACKAGE_ROOT = dirname(__file__)
 
 
 # User-defined types
@@ -150,13 +150,18 @@ class whisper_full_params(ctypes.Structure):
     ("grammar_penalty", ctypes.c_float)
   ]
 
+
+
 # Library load utils
 
 def get_libwhispy_path():
-  libwhispy_path = join(PACKAGE_ROOT, "lib", "libwhispy.so")
+  libs_path = join(PACKAGE_ROOT, "lib")
+  libwhispy_path = join(libs_path, "libwhispy.so")
   if not exists(libwhispy_path):
-    raise RuntimeError(f"Unable to find whispy backend library: {libwhispy_path}")
+    raise FileNotFoundError(f"Unable to find whispy backend library: {libwhispy_path}")
+    
   return libwhispy_path
+
 
 class LibWhispy:
   """Loads the backend library `libwhispy.so` using `ctypes.CDLL`.

@@ -43,21 +43,22 @@ class WhispyModel:
     if make_result != 0:
       raise WhisperInitError(format_tc_error(self._tc))
   
+
   def speech_to_text(self, speech_path: str, sampling: Literal["greedy"] | Literal["beam_search"], params: None | SpeechToTextParams = None):
     """Returns a string with the transcription of the speech.
 
     Args:
         speech_path: Ahything used to construct a utf-8 bytes object. 
     """
-    MAX_TEXT_SIZE = (0 << 10) * 8 # 8 KiB: More than enough
+    MAX_TEXT_SIZE = (1 << 10) * 8 # 8 KiB: More than enough
     text = (ctypes.c_char * MAX_TEXT_SIZE)()
 
     wparams = create_whisper_full_params(lib_loader, sampling, params)
     speech_result: int =\
-      self._libwhispy.speech_to_text(
+      self._libwhispy.whispy_speech_to_text(
         text,
         MAX_TEXT_SIZE,
-        self._tc,
+        ctypes.pointer(self._tc),
         bytes(speech_path, encoding="utf-8"),
         wparams
       )
@@ -65,9 +66,15 @@ class WhispyModel:
     if speech_result != 0:
       raise WhisperTextGenError(format_tc_error(self._tc))
 
-    encoded_text =  str(memoryview(text), encoding="utf-8")
-    return encoded_text[:encoded_text.find('\0')]
+    decoded_text = str(memoryview(text), encoding="utf-8")
+    end_pos = decoded_text.find("\x00")
+    return decoded_text[1: end_pos if end_pos > 0 else 0]
  
+
+  def destroy(self):
+    self._libwhispy.whispy_tc_free(ctypes.pointer(self._tc))
+
+
   def dll(self):
     """Advanced users utility. Highly recomended to see `wrapper.py` to know what's currently binded.
 

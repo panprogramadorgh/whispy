@@ -140,14 +140,13 @@ class CMakeBuild(build_ext):
       shutil.copy(join(cmake_build_dir, lib), package_libraries_path)
     
 
-# TODO: Finish
 def download_ggml_model(model_name: str):
-  script_path = join(PROJECT_ROOT, "lib", "whisper.cpp", "models", "download-ggml-model.sh")
-  subprocess.check_call([script_path, model_name])
+  origin = join(PROJECT_ROOT, "lib", "whisper.cpp", "models")
+  subprocess.check_call([join(origin, "download-ggml-model.sh"), model_name])
 
   models_dir = join(PROJECT_ROOT, "src", "whispy", "models")
-  makedirs(models_dir)
-  subprocess.check_call(["cp", ])
+  makedirs(models_dir, exist_ok=True)
+  shutil.copy(join(origin, f"ggml-{model_name}.bin"), models_dir)
 
 setup(
   # Metadata
@@ -180,8 +179,8 @@ setup(
   ],
   cmdclass=dict(build_ext=CMakeBuild),
 
-  # Include libraries
-  package_data={
-    "whispy": ["./lib/*", "./models/*"],
+  # Include the libraries and the model
+  package_data= {
+    "whispy": ["./lib/*", "./models/*"]
   }
 )

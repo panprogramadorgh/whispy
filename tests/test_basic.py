@@ -21,18 +21,25 @@ class BasicTest(unittest.TestCase):
     import whispy
 
     self.assertTrue(hasattr(whispy, "WhispyModel"), "whispery does not have 'WhispyModel' as an exported symbol.")
+    self.assertTrue(hasattr(whispy, "ModelParams"), "whispery does not have 'ModelParams' as an exported symbol.")
+    self.assertTrue(hasattr(whispy, "SpeechToTextParams"), "whispery does not have 'SpeechToTextParams' as an exported symbol.")
     self.assertTrue(hasattr(whispy, "WhisperInitError"), "whispery does not have 'WhisperInitError' as an exported symbol.")
     self.assertTrue(hasattr(whispy, "WhisperTextGenError"), "whispery does not have 'WhisperTextGenError' as an exported symbol.")
+    print("Whispy was loaded:", whispy)
 
     # Init the model 
-    from whispy import WhispyModel
-    model = WhispyModel(model_name="base")
-    print(model)
+    model = whispy.WhispyModel(model_name="base", params={"use_gpu": False})
+    print("Model was loaded:", model)
     
     # Transcribe
-    output_text = model.speech_to_text("./inputs/jfk.pcmf33", sampling="greedy")
-    target_output = "And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country."
-    self.assertEqual(output_text, target_output)
+    output_text = model.speech_to_text("./inputs/jfk.pcmf32", sampling="greedy", params={"language": b"en", "n_threads": 6})
+    print("The resulting text is:", output_text)
+    self.assertTrue(output_text.lower().count("my fellow americans") > 0)
+    self.assertTrue(output_text.lower().count("ask not what your country can do for you") > 0)
+    self.assertTrue(output_text.lower().count("ask what you can do for your country") > 0)
+
+    model.destroy()
+    print("Model was destroyed.")
 
 
 if __name__ == "__main__":

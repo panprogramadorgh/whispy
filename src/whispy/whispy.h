@@ -32,7 +32,12 @@ enum class whispy_tc_state
   /**
    * whisper_full failed failed.
    */
-  SPEECHGEN_ERROR
+  SPEECHGEN_ERROR,
+
+  /**
+   * The transcript context was intentionally freed. 
+   */
+  FREEDCTX_ERROR
 };
 
 extern constexpr const std::size_t tc_message_size = 1024; // 1 KiB

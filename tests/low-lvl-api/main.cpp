@@ -28,6 +28,6 @@ int main()
   whispy_tc_free(&ctx);  
   std::cout << "Transcript context was freed" << '\n';
 
-  std::cout << text << '\n';
+  std::cout << text + 1 << '\n'; // skips the initial white space
   return 0;
 }

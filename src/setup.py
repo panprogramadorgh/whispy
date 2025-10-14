@@ -9,8 +9,6 @@ from setuptools import find_packages, Extension, setup
 from setuptools.command.build_ext import build_ext
 
 
-# TODO: Download the model file.
-
 # Constants
 
 PROJECT_ROOT = dirname(dirname(__file__))

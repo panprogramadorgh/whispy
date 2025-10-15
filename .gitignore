@@ -1,15 +1,13 @@
 __pycache__
 .vscode
 
-build
 *build
 *.build.*
-lib
-dist
 
-models
+src/whispy/lib
+src/whispy/models
+src/dist
+src/*.egg-info
 
 env
 .venv
-
-*egg-info

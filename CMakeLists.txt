@@ -14,6 +14,13 @@ target_compile_features(${TARGET} PUBLIC cxx_std_23)
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/whisper.cpp")
 target_link_libraries(${TARGET} PUBLIC whisper)
 
+# Config minimp3
+# target_include_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/lib/minimp3")
+
 # C++ Tests
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/tests/low-lvl-api")
+
+# C++ Sandbox
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/sandbox/audio_decoding_minimp3")

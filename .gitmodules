@@ -4,3 +4,6 @@
 [submodule "lib/minimp3"]
 	path = lib/minimp3
 	url = git@github.com:lieff/minimp3.git
+[submodule "lib/ffmpeg"]
+	path = lib/ffmpeg
+	url = https://git.ffmpeg.org/ffmpeg.git

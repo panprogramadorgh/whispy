@@ -3,12 +3,55 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 #include <stdexcept>
 
 #include <cstring>
 #include <cmath>
 
 #include "whispy.h"
+
+
+namespace fs = std::filesystem;
+
+/**
+ * Allows to decode audio files with different codecs:
+ * 
+ * 1. wav
+ * 2. flac
+ * 3. opus
+ * 4. mp3
+ * 5. ogg
+ * 6. webm (maybe: It is associated to files with video tracks, which are much more heavy)
+ * 
+ * The audio codec is auto-detected from the bit-stream thanks to libavformat (LGPL).
+ */
+std::vector<std::uint8_t> decode_audio_file(whispy_transcript_context &tc, fs::path audio_file) {
+  // TODO: Implement codec detection from bit stream.
+
+  std::vector<std::uint8_t> pcm_data{};
+
+  // mp3dec_t mp3_decoding_ctx;
+  // mp3dec_file_info_t mp3_decoding_info;
+  // if (mp3dec_load(&mp3_decoding_ctx, audio_file.string().c_str(), &mp3_decoding_info, nullptr, nullptr)) {
+  //   throw std::runtime_error((std::ostringstream{} << "Audio decoding error").str());
+  // }
+
+  // mp3_decoding_info.samples
+  // for (std::size_t i = 0; i < mp3_decoding_info.samples; i++)
+  // mp3_decoding_info.buffer
+
+  return pcm_data;
+}
+
+/**
+ * In charge of reducing the number of channels to one.
+ * @param pcm_samples The PCM samples as unsigned octets.
+ */
+void demux_pcm(std::vector<std::uint8_t> pcm_samples) {
+  // TODO: Implement 
+}
+
 
 /**
  * Stablishes the internal state of `whispy_transcript_context`.
@@ -19,15 +62,15 @@
  * 
  * @return Returns the same state that was stablished into the `whispy_transcript_context`.
  */
-whispy_tc_state set_tc_state(whispy_transcript_context *tc, whispy_tc_state state, const char *error_message)
+whispy_tc_state set_tc_state(whispy_transcript_context &tc, whispy_tc_state state, const char *error_message)
 {
   std::size_t msg_max_length = 0;
 
-  tc->last_error_code = state;
-  if (tc->last_error_message != nullptr && error_message != nullptr) {
+  tc.last_error_code = state;
+  if (tc.last_error_message != nullptr && error_message != nullptr) {
     msg_max_length = std::min(tc_message_size - 1, std::strlen(error_message));
-    std::memcpy(tc->last_error_message, error_message, msg_max_length);
-    tc->last_error_message[msg_max_length + 1] = '\0';
+    std::memcpy(tc.last_error_message, error_message, msg_max_length);
+    tc.last_error_message[msg_max_length + 1] = '\0';
   }
 
   return state;

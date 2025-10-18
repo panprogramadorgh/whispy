@@ -1,6 +1,6 @@
 import ctypes
 from .utils import get_libwhispy_path
-from .bindings import *
+from .whisper_bindings import *
 
 class LibWhispy:
   """Loads the backend library `libwhispy.so` using `ctypes.CDLL`.

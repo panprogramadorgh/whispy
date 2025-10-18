@@ -97,9 +97,6 @@ class CMakeBuild(build_ext):
       self.build_extension(ext)
       print(f"Extension '{ext.name}' is done.")
 
-      self.move_libraries(ext)
-      print(f"Libraries for '{ext.name}' were moved.")
-
       ext.on_finish()
       print(f"'on_finish' callback is done.")
 
@@ -119,23 +116,23 @@ class CMakeBuild(build_ext):
     subprocess.check_call(["cmake", ext.sourcedir], cwd=cmake_build_dir)
     subprocess.check_call(["cmake", "--build", "."], cwd=cmake_build_dir)
  
+  # TODO: CMake should move libraries automatically
+  # def move_libraries(self, ext: CMakeExtension):
+  #   """Moves the C++ libraries inside the package.
+  #   """
+  #   print(f"Moving '{ext.name}' libraries within the package.")
 
-  def move_libraries(self, ext: CMakeExtension):
-    """Moves the C++ libraries inside the package.
-    """
-    print(f"Moving '{ext.name}' libraries within the package.")
+  #   cmake_build_dir =  join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
+  #   """ CMake files
+  #   """
+  #   package_libraries_path = join(ext.sourcedir, "src", "whispy", "lib")
+  #   """whispy C++ libraries
+  #   """
 
-    cmake_build_dir =  join(ext.sourcedir, "cmake-debug-build" if self.debug else "cmake-build")
-    """ CMake files
-    """
-    package_libraries_path = join(ext.sourcedir, "src", "whispy", "lib")
-    """whispy C++ libraries
-    """
+  #   makedirs(package_libraries_path, exist_ok=True)
 
-    makedirs(package_libraries_path, exist_ok=True)
-
-    for lib in ext.libraries:
-      shutil.copy(join(cmake_build_dir, lib), package_libraries_path)
+  #   for lib in ext.libraries:
+  #     shutil.copy(join(cmake_build_dir, lib), package_libraries_path)
     
 
 def download_ggml_model(model_name: str):

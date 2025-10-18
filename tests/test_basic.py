@@ -6,14 +6,16 @@ import subprocess
 
 class BasicTest(unittest.TestCase):
 
-  def setUp(self):
+  @classmethod
+  def setUpClass(cls):
     """Prepare a wheel for the package and temporary install the package in order to begin with the tests. 
     """
     pkgs_path = os.path.join(os.path.realpath("."), "src")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", os.path.join(pkgs_path, "requirements.txt")])
     subprocess.check_call([sys.executable, "-m", "pip", "install", pkgs_path])
 
-  def tearDown(self):
+  @classmethod
+  def tearDownClass(cls):
     subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "whispy"])
 
   def test_speech_to_text(self):
@@ -28,11 +30,17 @@ class BasicTest(unittest.TestCase):
     print("Whispy was loaded:", whispy)
 
     # Init the model 
-    model = whispy.WhispyModel(model_name="base", params={"use_gpu": False})
+    model = whispy.WhispyModel(whispy.ModelParams(model_name="base", use_gpu=False, flash_attn=True))
     print("Model was loaded:", model)
     
     # Transcribe
-    output_text = model.speech_to_text("./inputs/jfk.pcmf32", sampling="greedy", params={"language": b"en", "n_threads": 6})
+    wfull_params = whispy.SpeechToTextParams("greedy")
+
+    @wfull_params.progress_callback
+    def print_progress(progress: int): # type: ignore
+      print(f"- {progress}")
+
+    output_text = model.speech_to_text("./inputs/jfk.pcmf32", wfull_params)
     print("The resulting text is:", output_text)
     self.assertTrue(output_text.lower().count("my fellow americans") > 0)
     self.assertTrue(output_text.lower().count("ask not what your country can do for you") > 0)

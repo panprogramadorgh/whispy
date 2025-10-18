@@ -2,7 +2,7 @@ from typing import Literal, Callable
 from functools import wraps
 import ctypes 
 
-from .bindings import *
+from .whisper_bindings import *
 from .utils import *
 
 
@@ -224,7 +224,7 @@ class WhispyModel:
       raise WhisperInitError(format_tc_error(self._tc))
   
 
-  def speech_to_text(self, speech_path: str, sampling: Literal["greedy"] | Literal["beam_search"], params: SpeechToTextParams = SpeechToTextParams("greedy")):
+  def speech_to_text(self, speech_path: str, params: SpeechToTextParams = SpeechToTextParams("greedy")):
     """Returns a string with the transcription of the speech.
 
     Args:

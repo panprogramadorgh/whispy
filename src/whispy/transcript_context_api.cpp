@@ -16,7 +16,7 @@ extern "C"
   /**
    * Initializes a `whispy_transcript_context` struct given the `model_path` and `cparams` provided.
    * 
-   * @param tc A pointer to a `whispy_transcript_context`.
+   * @param tc A reference to a `whispy_transcript_context`.
    * @param model_path A character array containing the path to the model file.
    * @param cparams Internal transcript context's model initialization parameters. 
    * 
@@ -37,7 +37,7 @@ extern "C"
     }
     catch (const std::exception &e)
     {
-      return set_tc_state(tc, whispy_tc_state::MEMALLOC_ERROR, e.what());
+      return set_tc_state(*tc, whispy_tc_state::MEMALLOC_ERROR, e.what());
     }
 
     // Load the model file.
@@ -47,7 +47,7 @@ extern "C"
     }
     catch (const std::exception &e)
     {
-      return set_tc_state(tc, whispy_tc_state::LOADMODEL_ERROR, e.what());
+      return set_tc_state(*tc, whispy_tc_state::LOADMODEL_ERROR, e.what());
     }
 
     tc->model_context = whisper_init_from_buffer_with_params(
@@ -56,9 +56,9 @@ extern "C"
         cparams);
 
     if (tc->model_context == nullptr)
-      return set_tc_state(tc, whispy_tc_state::INVWHISCTX_ERROR, "whisper_init_from_buffer_with_params() failed");
+      return set_tc_state(*tc, whispy_tc_state::INVWHISCTX_ERROR, "whisper_init_from_buffer_with_params() failed");
 
-    return set_tc_state(tc, whispy_tc_state::OK, nullptr);
+    return set_tc_state(*tc, whispy_tc_state::OK, nullptr);
   }
 
   /**
@@ -98,7 +98,7 @@ extern "C"
       return tc->last_error_code;
 
     if (tc->model_context == nullptr)
-      return set_tc_state(tc, whispy_tc_state::INVWHISCTX_ERROR, "Bad whisper context");
+      return set_tc_state(*tc, whispy_tc_state::INVWHISCTX_ERROR, "Bad whisper context");
 
     try
     {
@@ -106,13 +106,13 @@ extern "C"
     }
     catch (const std::exception &e)
     {
-      return set_tc_state(tc, whispy_tc_state::LOADSPEECH_ERROR, e.what());
+      return set_tc_state(*tc, whispy_tc_state::LOADSPEECH_ERROR, e.what());
     }
 
     wret = whisper_full(tc->model_context, wparams, speech_file.data(), speech_file.size());
     if (wret != 0)
     {
-      return set_tc_state(tc, whispy_tc_state::SPEECHGEN_ERROR, "whisper_full() failed");
+      return set_tc_state(*tc, whispy_tc_state::SPEECHGEN_ERROR, "whisper_full() failed");
     }
 
     nsegments = whisper_full_n_segments(tc->model_context);
@@ -130,6 +130,6 @@ extern "C"
     }
     text[text_pos] = '\0';
 
-    return set_tc_state(tc, whispy_tc_state::OK, nullptr); // Flushes any previous bad state.
+    return set_tc_state(*tc, whispy_tc_state::OK, nullptr); // Flushes any previous bad state.
   }
 }

@@ -8,4 +8,4 @@ RUN apt update && apt install -y cmake make
 WORKDIR /app
 COPY . .
 
-CMD ["sh", "-c", "./configure.sh && ./make.sh"]
+CMD ["sh", "-c", "./configure && make -j 4"]

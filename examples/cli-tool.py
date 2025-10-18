@@ -11,7 +11,7 @@ if not speech_file:
 # Init model
 model: WhispyModel
 try:
-  model = WhispyModel(model_name="base", params={"use_gpu": False})
+  model = WhispyModel()
 except whispy.WhisperInitError as error:
   sys.stderr.write(str(error) + '\n')
   sys.exit(1)
@@ -19,7 +19,7 @@ except whispy.WhisperInitError as error:
 # Transcribe
 text = ""
 try:
-  text = model.speech_to_text(speech_file, sampling="greedy", params={"n_threads": 20})
+  text = model.speech_to_text(speech_file)
 except whispy.WhisperTextGenError as error:
   sys.stderr.write(str(error) + '\n')
   sys.exit(1)

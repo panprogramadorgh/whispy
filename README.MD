@@ -39,7 +39,7 @@ pip install ./src
 Run from the root of the project:
 
 ```sh
-./configure.sh && ./make.sh
+./configure && make -j 4
 ```
 
 ### Using Docker ?

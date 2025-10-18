@@ -2,7 +2,7 @@ from typing import TypedDict, Literal
 from os.path import join, dirname, exists
 import ctypes
 
-from .bindings import *
+from .whisper_bindings import *
 from .lib_loader import LibWhispy
 
 # Paths

@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 3.16)
-project(whispy)
+include("cmake/ProjectSetup.cmake")
+include("PrepareFFMPEG")
 
-include(ExternalProject)
 
 # Checks the library ext name.
 set(LIB_EXTNAME)
@@ -15,10 +14,6 @@ else()
 	message(FATAL_ERROR "Unsupported operating system")
 endif()
 
-# Global cmake config.
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/src/whispy/lib")
-# TODO: External project doesn't configure RPATH for ffmpeg libraries.
-set(CMAKE_BUILD_RPATH "$ORIGIN")
 
 # ---
 

@@ -4,7 +4,7 @@
 # ============================================================
 
 # --- Minimum version of CMake allowd by the project ---
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.26)
 
 # --- Explicit CMake Policy ---
 if(POLICY CMP0077)
@@ -27,7 +27,7 @@ list(APPEND CMAKE_MODULE_PATH
 
 # Simplifies library linking
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/src/whispy/lib")
-set(CMAKE_BUILD_RPATH "$ORIGIN") # TODO: External project doesn't configure RUNPATH for ffmpeg libraries.
+set(CMAKE_BUILD_RPATH "$ORIGIN")
 
 # Enforces used version of C/C++
 set(CMAKE_C_STANDARD 23)

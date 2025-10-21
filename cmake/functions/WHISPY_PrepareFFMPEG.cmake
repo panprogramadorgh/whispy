@@ -23,6 +23,7 @@ function(prepare_ffmpeg target)
 			bash -c "
 				cd ${CMAKE_SOURCE_DIR}/lib/ffmpeg && \
 				env CC=gcc CFLAGS=\"-std=c11 -O3\" ./configure \
+					--disable-x86asm \
 					--enable-shared \
 					--disable-static \
 					--disable-programs \
@@ -47,8 +48,22 @@ function(prepare_ffmpeg target)
 	)
 	add_dependencies(${target} ffmpeg)
 
-	# Links the libraries and makes them visible
-	target_link_libraries(${target} PRIVATE ${FFMPEG_LIBS})
+	# --- Links the libraries ---
+	foreach(LIB_PATH IN ITEMS ${FFMPEG_LIBS})
+		get_filename_component(LIB_NAME ${LIB_PATH} NAME_WE)
+		string(REPLACE "lib" "" LIB_NAME ${LIB_NAME})	
+		set(IMPORTED_TARGET "ffmpeg_${LIB_NAME}")
+
+		# Imported library target
+		add_library(${IMPORTED_TARGET} SHARED IMPORTED)
+		set_target_properties(${IMPORTED_TARGET} PROPERTIES
+			IMPORTED_LOCATION ${LIB_PATH}	
+		)
+
+		target_link_libraries(${target} PRIVATE ${IMPORTED_TARGET})
+	endforeach()
+
+	# Header files
 	target_include_directories(${target} PRIVATE "${CMAKE_SOURCE_DIR}/lib/ffmpeg")
 
 	# Modifies libraries' RUNPATH configuration

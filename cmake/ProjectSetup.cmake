@@ -3,9 +3,6 @@
 #  Main compilation configurations
 # ============================================================
 
-# --- Minimum version of CMake allowd by the project ---
-cmake_minimum_required(VERSION 3.26)
-
 # --- Explicit CMake Policy ---
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)  # Allows overriding options by using -D
@@ -13,6 +10,8 @@ endif()
 
 # --- Declares the name and the used languages for the project ---
 project(whispy LANGUAGES C CXX)
+
+# --- File Generator  ---
 
 # --- Adds custom directories for modules ---
 list(APPEND CMAKE_MODULE_PATH
@@ -30,8 +29,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/src/whispy/lib")
 set(CMAKE_BUILD_RPATH "$ORIGIN")
 
 # Enforces used version of C/C++
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -53,44 +52,6 @@ elseif(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG   "/Zi /Od /DDEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
 endif()
-
-# ============================================================
-#  Platform and toolchain detection
-# ============================================================
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    message(STATUS "Compiling Linux environment")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    message(STATUS "Compiling Windows environment")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    message(STATUS "Compiling macOS environment")
-endif()
-
-# Ejemplo: Include specific toolchain script if it exists
-# if(DEFINED TARGET_ARCH AND EXISTS "${CMAKE_SOURCE_DIR}/cmake/toolchains/${TARGET_ARCH}.cmake")
-#     include("${CMAKE_SOURCE_DIR}/cmake/toolchains/${TARGET_ARCH}.cmake")
-# endif()
-
-# ============================================================
-#  Including project utilitaty functions 
-# ============================================================
-
-# include(Utils OPTIONAL)
-# include(AddExternalLibrary OPTIONAL)
-# include(ConfigureBuildOptions OPTIONAL)
-
-# ============================================================
-#  External dependencies configuration
-# ============================================================
-
-# if(EXISTS "${CMAKE_SOURCE_DIR}/lib")
-#     message(STATUS "Configuting external dependencies...")
-#     include(ExternalProject)
-    # Ejemplo: A function created by us in charge of handling external dependencies
-    # if(COMMAND setup_external_dependencies)
-    #     setup_external_dependencies()
-    # endif()
-# endif()
 
 # ============================================================
 #  Project global variables

@@ -3,6 +3,10 @@
 #  Speech to text library
 # ============================================================
 
+# --- Minimum version of CMake allowd by the project ---
+cmake_minimum_required(VERSION 3.26)
+
+# --- Includes ---
 include("cmake/ProjectSetup.cmake")
 include("WHISPY_DetectTools")
 include("WHISPY_PrepareFFMPEG")

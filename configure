@@ -1,20 +1,24 @@
 #!/bin/sh
 
-# Read env vars
-BTYPE=$CMAKE_BUILD_TYPE
-BDIR=$CMAKE_BUILD_DIR
-COMPILER=$CMAKE_CXX_COMPILER
+build_type=Release
+build_directory="cmake-build"
 
-if [ "$BTYPE" = "" ]; then
-  BTYPE=Release
+while getopts ":t:" opt; do
+  case "$opt" in
+    t) build_type="$OPTARG";;
+    \?) echo "Wrong option: -$OPTARG" >&2 || exit 2;;
+    :) echo "Invalid argument for option -$OPTARG" >&2 || exit 2;;
+  esac
+done
+
+if [ "$build_type" = "Debug" ]; then
+  build_directory="cmake-debug-build"
 fi
 
-if [ "$BDIR" = "" ]; then
-  BDIR=cmake-build
-fi
+shift $((OPTIND - 1))
 
-if [ "$COMPILER" = "" ]; then
-  COMPILER=/usr/bin/g++
+if [ $# -gt 0 ]; then  
+  cmake . -B $build_directory -DCMAKE_BUILD_TYPE=$build_type -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchains/$1.cmake
+else
+  cmake . -B $build_directory -DCMAKE_BUILD_TYPE=$build_type
 fi
-
-cmake . -B $BDIR -DCMAKE_BUILD_TYPE=$BTYPE -DCMAKE_CXX_COMPILER=$COMPILER

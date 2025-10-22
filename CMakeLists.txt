@@ -6,6 +6,9 @@
 # --- Minimum version of CMake allowd by the project ---
 cmake_minimum_required(VERSION 3.26)
 
+# --- Declares the name and the used languages for the project ---
+project(whispy LANGUAGES C CXX)
+
 # --- Includes ---
 include("cmake/ProjectSetup.cmake")
 include("WHISPY_DetectTools")

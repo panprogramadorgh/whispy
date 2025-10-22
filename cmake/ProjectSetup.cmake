@@ -8,9 +8,6 @@ if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)  # Allows overriding options by using -D
 endif()
 
-# --- Declares the name and the used languages for the project ---
-project(whispy LANGUAGES C CXX)
-
 # --- File Generator  ---
 
 # --- Adds custom directories for modules ---
@@ -42,10 +39,12 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Generic flags
-set(COMMON_C_FLAGS "-Wall -Wextra -Wpedantic")
-set(COMMON_CXX_FLAGS "-Wall -Wextra -Wpedantic")
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(COMMON_C_FLAGS "-Wall -Wextra -Wpedantic")
+    set(COMMON_CXX_FLAGS "-Wall -Wextra -Wpedantic")
+
+    set(CMAKE_C_FLAGS_DEBUG   "-O0 -g ${COMMON_C_FLAGS}")
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG ${COMMON_C_FLAGS}")
     set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g ${COMMON_CXX_FLAGS}")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG ${COMMON_CXX_FLAGS}")
 elseif(MSVC)

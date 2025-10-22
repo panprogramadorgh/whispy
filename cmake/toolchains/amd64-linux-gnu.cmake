@@ -5,9 +5,6 @@
 #   ./configure amd64-linux-gnu
 # ============================================================================
 
-# --- Minimum version of CMake allowd by the project ---
-cmake_minimum_required(VERSION 3.26)
-
 # --- Target System -----------------------------------------------------------
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
@@ -17,11 +14,10 @@ set(CMAKE_SYSTEM_PROCESSOR x86_64)
 # You may substitute by some absolute paths if it isn't cross-compilation
 set(CMAKE_C_COMPILER   gcc)
 set(CMAKE_CXX_COMPILER g++)
-set(CMAKE_MAKE_PROGRAM make)
 
 # --- Compiler Flags ---
-et(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g -Wall -Wextra -Wpedantic")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -Wall -Wextra -Wpedantic")
+set(CMAKE_C_FLAGS_INIT "")
+set(CMAKE_C_CXX_FLAGS_INIT "")
 
 # --- Enlaces y librerías -----------------------------------------------------
 # Puedes ajustar rutas personalizadas si tu entorno lo requiere

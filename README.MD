@@ -1,6 +1,12 @@
 # WhisPy
 
+A lightweight, easy-to-use, programmatic, and high-level AI library. Its purpose is to transcribe audio recordings in dozens of languages ​​into text.
+
+Watch a demonstration [here](https://www.youtube.com/watch?v=xKzfLOgKSBc).
+
 ## Easy Installation
+
+> Still to be implemented.
 
 ```sh
 pip install whispy
@@ -24,6 +30,12 @@ Initialize and update the submodules if needed:
 
 ```bash
 git submodule update --init --recursive
+```
+
+Create a virtual environment and install the requirements:
+
+```bash
+pip install -r ./src/requirements.txt
 ```
 
 After creating a virtual environment, install the package from the src directory of this project:
